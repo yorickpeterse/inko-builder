@@ -27,11 +27,11 @@ import std.stdio.STDOUT
 class async Main {
   fn async main {
     let out = STDOUT.new
-    let doc = Document.new
-
-    doc.element('person').then fn (person) {
-      person.element('name').text('Alice')
-      person.element('city').text('Foo Town')
+    let doc = Document.with fn (doc) {
+      doc.element('person').then fn (person) {
+        person.element('name').text('Alice')
+        person.element('city').text('Foo Town')
+      }
     }
 
     out.print(doc.to_pretty_string)
@@ -51,7 +51,43 @@ This produces the following XML:
 
 Generating a simple HTML document:
 
-TODO
+```inko
+import builder.html.Document
+import std.stdio.STDOUT
+
+class async Main {
+  fn async main {
+    let out = STDOUT.new
+    let doc = Document.with fn (doc) {
+      doc.html.then fn (html) {
+        html.head.then fn (head) {
+          head.title.text('My website')
+        }
+
+        html.body.then fn (body) {
+          body.p.text('Hello!')
+        }
+      }
+    }
+
+    out.print(doc.to_pretty_string)
+  }
+}
+```
+
+This produces the following HTML:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My website</title>
+  </head>
+  <body>
+    <p>Hello!</p>
+  </body>
+</html>
+```
 
 # License
 

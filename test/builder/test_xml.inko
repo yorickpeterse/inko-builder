@@ -3,17 +3,17 @@ import builder.xml.Document
 
 fn pub tests(t: mut Tests) {
   t.test('Document.to_string') fn (t) {
-    let doc = Document.new
-
-    doc.element('person').attr('verified', 'true').then fn (p) {
-      p.element('name').text('Alice')
-      p.element('address').then fn (a) {
-        a.element('city').text('Foo Town')
-        a.element('street').then fn (s) {
-          s.text('Foo')
-          s.element('strong').text('Street')
+    let doc = Document.with fn (doc) {
+      doc.element('person').attr('verified', 'true').then fn (p) {
+        p.element('name').text('Alice')
+        p.element('address').then fn (a) {
+          a.element('city').text('Foo Town')
+          a.element('street').then fn (s) {
+            s.text('Foo')
+            s.element('strong').text('Street')
+          }
+          a.element('bla').self_closing
         }
-        a.element('bla').self_closing
       }
     }
 
@@ -28,22 +28,23 @@ fn pub tests(t: mut Tests) {
 <street>Foo<strong>Street</strong></street>\
 <bla />\
 </address>\
-</person>'
+</person>\
+      '
     )
   }
 
   t.test('Document.to_pretty_string') fn (t) {
-    let doc = Document.new
-
-    doc.element('person').attr('verified', 'true').then fn (p) {
-      p.element('name').text('Alice')
-      p.element('address').then fn (a) {
-        a.element('city').text('Foo Town')
-        a.element('street').then fn (s) {
-          s.text('Foo')
-          s.element('strong').text('Street')
+    let doc = Document.with fn (doc) {
+      doc.element('person').attr('verified', 'true').then fn (p) {
+        p.element('name').text('Alice')
+        p.element('address').then fn (a) {
+          a.element('city').text('Foo Town')
+          a.element('street').then fn (s) {
+            s.text('Foo')
+            s.element('strong').text('Street')
+          }
+          a.element('bla').self_closing
         }
-        a.element('bla').self_closing
       }
     }
 
@@ -61,7 +62,26 @@ fn pub tests(t: mut Tests) {
     </street>
     <bla />
   </address>
-</person>'
+</person>\
+      '
+    )
+  }
+
+  t.test('Document.to_string with text to escape') fn (t) {
+    let doc = Document.with fn (doc) { doc.element('name').text('&><') }
+
+    t.equal(
+      doc.to_string,
+      '<?xml version="1.0" encoding="UTF-8" ?><name>&amp;&gt;&lt;</name>'
+    )
+  }
+
+  t.test('Document.to_string with attribute values characters to escape') fn (t) {
+    let doc = Document.with fn (doc) { doc.element('name').attr('foo', 'a"b') }
+
+    t.equal(
+      doc.to_string,
+      '<?xml version="1.0" encoding="UTF-8" ?><name foo="a&quot;b"></name>'
     )
   }
 }

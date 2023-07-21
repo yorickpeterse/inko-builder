@@ -1,0 +1,87 @@
+import std.test.Tests
+import builder.html.Document
+
+fn pub tests(t: mut Tests) {
+  t.test('Document.to_string') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.html.then fn (html) {
+        html.head.then fn (head) {
+          head.title.text('Testing')
+          head.link.attr('href', 'foo')
+        }
+
+        html.body.then fn (body) {
+          body.p.then fn (p) {
+            p.text('hello')
+            p.strong.text('world')
+          }
+        }
+      }
+    }
+
+    t.equal(
+      doc.to_string,
+      '\
+<!DOCTYPE html>\
+<html>\
+<head>\
+<title>Testing</title>\
+<link href="foo" />\
+</head>\
+<body>\
+<p>hello<strong>world</strong></p>\
+</body>\
+</html>\
+'
+    )
+  }
+
+  t.test('Document.to_pretty_string') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.html.then fn (html) {
+        html.head.then fn (head) {
+          head.title.text('Testing')
+          head.link.attr('href', 'foo')
+        }
+
+        html.body.then fn (body) {
+          body.p.then fn (p) {
+            p.text('hello')
+            p.strong.text('world')
+          }
+        }
+      }
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Testing</title>
+    <link href="foo" />
+  </head>
+  <body>
+    <p>
+      hello
+      <strong>world</strong>
+    </p>
+  </body>
+</html>\
+      '
+    )
+  }
+
+  t.test('Document.to_string with text to escape') fn (t) {
+    let doc = Document.with fn (doc) { doc.p.text('&><') }
+
+    t.equal(doc.to_string, '<!DOCTYPE html><p>&amp;&gt;&lt;</p>')
+  }
+
+  t.test('Document.to_string with attribute values characters to escape') fn (t) {
+    let doc = Document.with fn (doc) { doc.p.attr('foo', 'a"b') }
+
+    t.equal(doc.to_string, '<!DOCTYPE html><p foo="a&quot;b"></p>')
+  }
+}

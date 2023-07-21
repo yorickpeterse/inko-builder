@@ -1,0 +1,851 @@
+# Generating of HTML5 documents and elements.
+import builder.xml.(escape)
+import std.string.(StringBuffer, ToString)
+
+# An HTML5 document.
+class pub Document {
+  # All top-level nodes in this document.
+  let pub @children: Array[Node]
+
+  # Returns a new empty document.
+  fn pub static new -> Document {
+    Document { @children = [] }
+  }
+
+
+  # Creates a document and passes a mutable reference to the closure, returning
+  # the document afterwards.
+  #
+  # # Examples
+  #
+  #     import builder.html.Document
+  #
+  #     Document.with fn (doc) {
+  #       doc.head.then fn (head) {
+  #         head.title.text('Hello')
+  #       }
+  #     }
+  fn pub static with(func: fn (mut Document)) -> Document {
+    let doc = new
+
+    func.call(doc)
+    doc
+  }
+
+  # Returns an indented `String` containing the HTML representation of `self`.
+  #
+  # This method uses two spaces for indentation. If you want to customize the
+  # indentation, use the `Generator` type directly instead.
+  #
+  # # Examples
+  #
+  #     import builder.html.Document
+  #
+  #     let doc = Document.new
+  #
+  #     doc.p.text('hello')
+  #     doc.to_pretty_string # => "<p>\n  hello\n</p>"
+  fn pub to_pretty_string -> String {
+    Generator.new(indent: '  ').generate(self)
+  }
+}
+
+impl ToString for Document {
+  # Returns a `String` containing the HTML representation of `self`.
+  #
+  # # Examples
+  #
+  #     import builder.html.Document
+  #
+  #     let doc = Document.new
+  #
+  #     doc.p.text('hello')
+  #     doc.to_string # => '<p>hello</p>'
+  fn pub to_string -> String {
+    Generator.new(indent: '').generate(self)
+  }
+}
+
+impl Builder for Document {
+  fn pub mut add_child(node: Node) {
+    @children.push(node)
+  }
+}
+
+# A node in an HTML document.
+class pub enum Node {
+  # The node is an element, i.e. `<foo></foo>`.
+  case Element(Element)
+
+  # The node is a text node.
+  case Text(String)
+}
+
+# An HTML element.
+class pub Element {
+  # The name of this element.
+  let pub @name: String
+
+  # The attributes of this element.
+  let pub @attributes: Map[String, String]
+
+  # The child nodes of this element.
+  let pub @children: Array[Node]
+
+  # If the element is a self-closing element.
+  let pub @self_closing: Bool
+
+  # Returns a new element with the given name.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('p')
+  fn pub static new(name: String) -> Element {
+    Element {
+      @name = name,
+      @attributes = Map.new,
+      @children = [],
+      @self_closing = false,
+    }
+  }
+
+  # Adds an attribute to this element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('user').attr('verified', 'true')
+  fn pub mut attr(name: String, value: String) -> mut Element {
+    @attributes.set(name, value)
+    self
+  }
+
+  # Calls the supplied closure, passing it a mutable reference to this element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('person').then fn (person) {
+  #       person.element('name')
+  #     }
+  fn pub mut then(func: fn (mut Element)) -> mut Element {
+    func.call(self)
+    self
+  }
+
+  # Adds a text node to this element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('p').text('Hello!')
+  fn pub mut text(text: String) {
+    @children.push(Node.Text(text))
+  }
+
+  # Marks this element as being a self-closing element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('link').self_closing
+  fn pub mut self_closing -> mut Element {
+    @self_closing = true
+    self
+  }
+
+  # Returns `true` if this element is a self-closing element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     let el = Element.new('link')
+  #
+  #     el.self_closing? # => true
+  fn pub self_closing? -> Bool {
+    @self_closing
+  }
+}
+
+impl Builder for Element {
+  fn pub mut add_child(node: Node) {
+    @children.push(node)
+  }
+}
+
+# A type providing methods for building an HTML document.
+trait pub Builder {
+  # Adds the child node to `self`.
+  fn pub mut add_child(node: Node)
+
+  # Adds an element with the given name as a cild of `self`.
+  fn pub mut element(name: String) -> mut Element {
+    let el = Element.new(name)
+    let ret = mut el
+
+    add_child(Node.Element(el))
+    ret
+  }
+
+  # Adds a `<a>` element as a child element.
+  fn pub mut a -> mut Element {
+    element('a')
+  }
+
+  # Adds a `<abbr>` element as a child element.
+  fn pub mut abbr -> mut Element {
+    element('abbr')
+  }
+
+  # Adds a `<address>` element as a child element.
+  fn pub mut address -> mut Element {
+    element('address')
+  }
+
+  # Adds a `<area>` element as a child element.
+  fn pub mut area -> mut Element {
+    element('area').self_closing
+  }
+
+  # Adds a `<article>` element as a child element.
+  fn pub mut article -> mut Element {
+    element('article')
+  }
+
+  # Adds a `<aside>` element as a child element.
+  fn pub mut aside -> mut Element {
+    element('aside')
+  }
+
+  # Adds a `<audio>` element as a child element.
+  fn pub mut audio -> mut Element {
+    element('audio')
+  }
+
+  # Adds a `<b>` element as a child element.
+  fn pub mut b -> mut Element {
+    element('b')
+  }
+
+  # Adds a `<base>` element as a child element.
+  fn pub mut base -> mut Element {
+    element('base').self_closing
+  }
+
+  # Adds a `<bdi>` element as a child element.
+  fn pub mut bdi -> mut Element {
+    element('bdi')
+  }
+
+  # Adds a `<bdo>` element as a child element.
+  fn pub mut bdo -> mut Element {
+    element('bdo')
+  }
+
+  # Adds a `<blockquote>` element as a child element.
+  fn pub mut blockquote -> mut Element {
+    element('blockquote')
+  }
+
+  # Adds a `<body>` element as a child element.
+  fn pub mut body -> mut Element {
+    element('body')
+  }
+
+  # Adds a `<br>` element as a child element.
+  fn pub mut br -> mut Element {
+    element('br').self_closing
+  }
+
+  # Adds a `<button>` element as a child element.
+  fn pub mut button -> mut Element {
+    element('button')
+  }
+
+  # Adds a `<canvas>` element as a child element.
+  fn pub mut canvas -> mut Element {
+    element('canvas')
+  }
+
+  # Adds a `<caption>` element as a child element.
+  fn pub mut caption -> mut Element {
+    element('caption')
+  }
+
+  # Adds a `<cite>` element as a child element.
+  fn pub mut cite -> mut Element {
+    element('cite')
+  }
+
+  # Adds a `<code>` element as a child element.
+  fn pub mut code -> mut Element {
+    element('code')
+  }
+
+  # Adds a `<col>` element as a child element.
+  fn pub mut col -> mut Element {
+    element('col').self_closing
+  }
+
+  # Adds a `<colgroup>` element as a child element.
+  fn pub mut colgroup -> mut Element {
+    element('colgroup')
+  }
+
+  # Adds a `<data>` element as a child element.
+  fn pub mut data -> mut Element {
+    element('data')
+  }
+
+  # Adds a `<datalist>` element as a child element.
+  fn pub mut datalist -> mut Element {
+    element('datalist')
+  }
+
+  # Adds a `<dd>` element as a child element.
+  fn pub mut dd -> mut Element {
+    element('dd')
+  }
+
+  # Adds a `<del>` element as a child element.
+  fn pub mut del -> mut Element {
+    element('del')
+  }
+
+  # Adds a `<details>` element as a child element.
+  fn pub mut details -> mut Element {
+    element('details')
+  }
+
+  # Adds a `<dfn>` element as a child element.
+  fn pub mut dfn -> mut Element {
+    element('dfn')
+  }
+
+  # Adds a `<dialog>` element as a child element.
+  fn pub mut dialog -> mut Element {
+    element('dialog')
+  }
+
+  # Adds a `<div>` element as a child element.
+  fn pub mut div -> mut Element {
+    element('div')
+  }
+
+  # Adds a `<dl>` element as a child element.
+  fn pub mut dl -> mut Element {
+    element('dl')
+  }
+
+  # Adds a `<dt>` element as a child element.
+  fn pub mut dt -> mut Element {
+    element('dt')
+  }
+
+  # Adds a `<em>` element as a child element.
+  fn pub mut em -> mut Element {
+    element('em')
+  }
+
+  # Adds a `<embed>` element as a child element.
+  fn pub mut embed -> mut Element {
+    element('embed').self_closing
+  }
+
+  # Adds a `<fieldset>` element as a child element.
+  fn pub mut fieldset -> mut Element {
+    element('fieldset')
+  }
+
+  # Adds a `<figcaption>` element as a child element.
+  fn pub mut figcaption -> mut Element {
+    element('figcaption')
+  }
+
+  # Adds a `<figure>` element as a child element.
+  fn pub mut figure -> mut Element {
+    element('figure')
+  }
+
+  # Adds a `<footer>` element as a child element.
+  fn pub mut footer -> mut Element {
+    element('footer')
+  }
+
+  # Adds a `<form>` element as a child element.
+  fn pub mut form -> mut Element {
+    element('form')
+  }
+
+  # Adds a `<h1>` element as a child element.
+  fn pub mut h1 -> mut Element {
+    element('h1')
+  }
+
+  # Adds a `<head>` element as a child element.
+  fn pub mut head -> mut Element {
+    element('head')
+  }
+
+  # Adds a `<header>` element as a child element.
+  fn pub mut header -> mut Element {
+    element('header')
+  }
+
+  # Adds a `<hgroup>` element as a child element.
+  fn pub mut hgroup -> mut Element {
+    element('hgroup')
+  }
+
+  # Adds a `<hr>` element as a child element.
+  fn pub mut hr -> mut Element {
+    element('hr').self_closing
+  }
+
+  # Adds a `<html>` element as a child element.
+  fn pub mut html -> mut Element {
+    element('html')
+  }
+
+  # Adds a `<i>` element as a child element.
+  fn pub mut i -> mut Element {
+    element('i')
+  }
+
+  # Adds a `<iframe>` element as a child element.
+  fn pub mut iframe -> mut Element {
+    element('iframe')
+  }
+
+  # Adds a `<img>` element as a child element.
+  fn pub mut img -> mut Element {
+    element('img').self_closing
+  }
+
+  # Adds a `<input>` element as a child element.
+  fn pub mut input -> mut Element {
+    element('input').self_closing
+  }
+
+  # Adds a `<ins>` element as a child element.
+  fn pub mut ins -> mut Element {
+    element('ins')
+  }
+
+  # Adds a `<kbd>` element as a child element.
+  fn pub mut kbd -> mut Element {
+    element('kbd')
+  }
+
+  # Adds a `<label>` element as a child element.
+  fn pub mut label -> mut Element {
+    element('label')
+  }
+
+  # Adds a `<legend>` element as a child element.
+  fn pub mut legend -> mut Element {
+    element('legend')
+  }
+
+  # Adds a `<li>` element as a child element.
+  fn pub mut li -> mut Element {
+    element('li')
+  }
+
+  # Adds a `<link>` element as a child element.
+  fn pub mut link -> mut Element {
+    element('link').self_closing
+  }
+
+  # Adds a `<main>` element as a child element.
+  fn pub mut main -> mut Element {
+    element('main')
+  }
+
+  # Adds a `<map>` element as a child element.
+  fn pub mut map -> mut Element {
+    element('map')
+  }
+
+  # Adds a `<mark>` element as a child element.
+  fn pub mut mark -> mut Element {
+    element('mark')
+  }
+
+  # Adds a `<menu>` element as a child element.
+  fn pub mut menu -> mut Element {
+    element('menu')
+  }
+
+  # Adds a `<meta>` element as a child element.
+  fn pub mut meta -> mut Element {
+    element('meta').self_closing
+  }
+
+  # Adds a `<meter>` element as a child element.
+  fn pub mut meter -> mut Element {
+    element('meter')
+  }
+
+  # Adds a `<nav>` element as a child element.
+  fn pub mut nav -> mut Element {
+    element('nav')
+  }
+
+  # Adds a `<noscript>` element as a child element.
+  fn pub mut noscript -> mut Element {
+    element('noscript')
+  }
+
+  # Adds a `<object>` element as a child element.
+  fn pub mut object -> mut Element {
+    element('object')
+  }
+
+  # Adds a `<ol>` element as a child element.
+  fn pub mut ol -> mut Element {
+    element('ol')
+  }
+
+  # Adds a `<optgroup>` element as a child element.
+  fn pub mut optgroup -> mut Element {
+    element('optgroup')
+  }
+
+  # Adds a `<option>` element as a child element.
+  fn pub mut option -> mut Element {
+    element('option')
+  }
+
+  # Adds a `<output>` element as a child element.
+  fn pub mut output -> mut Element {
+    element('output')
+  }
+
+  # Adds a `<p>` element as a child element.
+  fn pub mut p -> mut Element {
+    element('p')
+  }
+
+  # Adds a `<picture>` element as a child element.
+  fn pub mut picture -> mut Element {
+    element('picture')
+  }
+
+  # Adds a `<portal>` element as a child element.
+  fn pub mut portal -> mut Element {
+    element('portal')
+  }
+
+  # Adds a `<xperimental>` element as a child element.
+  fn pub mut xperimental -> mut Element {
+    element('xperimental')
+  }
+
+  # Adds a `<pre>` element as a child element.
+  fn pub mut pre -> mut Element {
+    element('pre')
+  }
+
+  # Adds a `<progress>` element as a child element.
+  fn pub mut progress -> mut Element {
+    element('progress')
+  }
+
+  # Adds a `<q>` element as a child element.
+  fn pub mut q -> mut Element {
+    element('q')
+  }
+
+  # Adds a `<rp>` element as a child element.
+  fn pub mut rp -> mut Element {
+    element('rp')
+  }
+
+  # Adds a `<rt>` element as a child element.
+  fn pub mut rt -> mut Element {
+    element('rt')
+  }
+
+  # Adds a `<ruby>` element as a child element.
+  fn pub mut ruby -> mut Element {
+    element('ruby')
+  }
+
+  # Adds a `<s>` element as a child element.
+  fn pub mut s -> mut Element {
+    element('s')
+  }
+
+  # Adds a `<samp>` element as a child element.
+  fn pub mut samp -> mut Element {
+    element('samp')
+  }
+
+  # Adds a `<script>` element as a child element.
+  fn pub mut script -> mut Element {
+    element('script')
+  }
+
+  # Adds a `<search>` element as a child element.
+  fn pub mut search -> mut Element {
+    element('search')
+  }
+
+  # Adds a `<section>` element as a child element.
+  fn pub mut section -> mut Element {
+    element('section')
+  }
+
+  # Adds a `<select>` element as a child element.
+  fn pub mut select -> mut Element {
+    element('select')
+  }
+
+  # Adds a `<slot>` element as a child element.
+  fn pub mut slot -> mut Element {
+    element('slot')
+  }
+
+  # Adds a `<small>` element as a child element.
+  fn pub mut small -> mut Element {
+    element('small')
+  }
+
+  # Adds a `<source>` element as a child element.
+  fn pub mut source -> mut Element {
+    element('source').self_closing
+  }
+
+  # Adds a `<span>` element as a child element.
+  fn pub mut span -> mut Element {
+    element('span')
+  }
+
+  # Adds a `<strong>` element as a child element.
+  fn pub mut strong -> mut Element {
+    element('strong')
+  }
+
+  # Adds a `<style>` element as a child element.
+  fn pub mut style -> mut Element {
+    element('style')
+  }
+
+  # Adds a `<sub>` element as a child element.
+  fn pub mut sub -> mut Element {
+    element('sub')
+  }
+
+  # Adds a `<summary>` element as a child element.
+  fn pub mut summary -> mut Element {
+    element('summary')
+  }
+
+  # Adds a `<sup>` element as a child element.
+  fn pub mut sup -> mut Element {
+    element('sup')
+  }
+
+  # Adds a `<table>` element as a child element.
+  fn pub mut table -> mut Element {
+    element('table')
+  }
+
+  # Adds a `<tbody>` element as a child element.
+  fn pub mut tbody -> mut Element {
+    element('tbody')
+  }
+
+  # Adds a `<td>` element as a child element.
+  fn pub mut td -> mut Element {
+    element('td')
+  }
+
+  # Adds a `<template>` element as a child element.
+  fn pub mut template -> mut Element {
+    element('template')
+  }
+
+  # Adds a `<textarea>` element as a child element.
+  fn pub mut textarea -> mut Element {
+    element('textarea')
+  }
+
+  # Adds a `<tfoot>` element as a child element.
+  fn pub mut tfoot -> mut Element {
+    element('tfoot')
+  }
+
+  # Adds a `<th>` element as a child element.
+  fn pub mut th -> mut Element {
+    element('th')
+  }
+
+  # Adds a `<thead>` element as a child element.
+  fn pub mut thead -> mut Element {
+    element('thead')
+  }
+
+  # Adds a `<time>` element as a child element.
+  fn pub mut time -> mut Element {
+    element('time')
+  }
+
+  # Adds a `<title>` element as a child element.
+  fn pub mut title -> mut Element {
+    element('title')
+  }
+
+  # Adds a `<tr>` element as a child element.
+  fn pub mut tr -> mut Element {
+    element('tr')
+  }
+
+  # Adds a `<track>` element as a child element.
+  fn pub mut track -> mut Element {
+    element('track').self_closing
+  }
+
+  # Adds a `<u>` element as a child element.
+  fn pub mut u -> mut Element {
+    element('u')
+  }
+
+  # Adds a `<ul>` element as a child element.
+  fn pub mut ul -> mut Element {
+    element('ul')
+  }
+
+  # Adds a `<var>` element as a child element.
+  fn pub mut var -> mut Element {
+    element('var')
+  }
+
+  # Adds a `<video>` element as a child element.
+  fn pub mut video -> mut Element {
+    element('video')
+  }
+
+  # Adds a `<wbr>` element as a child element.
+  fn pub mut wbr -> mut Element {
+    element('wbr').self_closing
+  }
+
+  # Adds a `<xmp>` element as a child element.
+  fn pub mut xmp -> mut Element {
+    element('xmp')
+  }
+}
+
+# A type for generating an HTML `String` from a `Document`.
+class pub Generator {
+  let @buffer: StringBuffer
+  let @indent: String
+
+  # Returns a new `Generator` that formats the HTML with the given indentation
+  #
+  # # Examples
+  #
+  # Generating HTML without any indentation:
+  #
+  #     import builder.html.(Document, Generator)
+  #
+  #     let doc = Document.new
+  #
+  #     doc.body.then fn (body) { body.p.text('hello') }
+  #
+  #     Generator
+  #       .new(indent: '')
+  #       .generate(doc) # => '<body><p>hello</p></body>'
+  #
+  # Using two spaces for indentation:
+  #
+  #     import builder.html.(Document, Generator)
+  #
+  #     let doc = Document.new
+  #
+  #     doc.body.then fn (body) { body.p.text('hello') }
+  #
+  #     Generator
+  #       .new(indent: '  ')
+  #       .generate(doc) # => "<body>\n  <p>\n    hello\n  </p>\n</body>"
+  fn pub static new(indent: String) -> Generator {
+    Generator { @buffer = StringBuffer.new, @indent = indent }
+  }
+
+  # Returns a `String` containing the HTML representation of the given document.
+  fn pub move generate(document: ref Document) -> String {
+    # There's not really a reason to use any other doctype for HTML5, so we just
+    # don't bother supporting anything else.
+    @buffer.push('<!DOCTYPE html>')
+
+    if indent? { @buffer.push("\n") }
+
+    document.children.iter.each fn (node) { node(node, depth: 0) }
+    @buffer.into_string
+  }
+
+  fn mut node(node: ref Node, depth: Int) {
+    match node {
+      case Element(el) -> element(el, depth)
+      case Text(v) -> @buffer.push(escape(v, quotes: false))
+    }
+  }
+
+  fn mut element(element: ref Element, depth: Int) {
+    @buffer.push('<')
+    @buffer.push(element.name)
+
+    element.attributes.iter.each fn (pair) {
+      @buffer.push(' ')
+      @buffer.push(pair.key)
+      @buffer.push('="')
+      @buffer.push(escape(pair.value, quotes: true))
+      @buffer.push('"')
+    }
+
+    if element.self_closing? and element.children.empty? {
+      @buffer.push(' />')
+      return
+    }
+
+    @buffer.push('>')
+
+    let nl = match element.children.opt(0) {
+      case Some(Text(_)) if element.children.size == 1 -> false
+      case _ -> indent?
+    }
+
+    if nl { @buffer.push("\n") }
+
+    element.children.iter.each fn (child) {
+      if nl { indent(depth + 1) }
+
+      node(child, depth + 1)
+
+      if nl { @buffer.push("\n") }
+    }
+
+    if nl { indent(depth) }
+
+    @buffer.push('</')
+    @buffer.push(element.name)
+    @buffer.push('>')
+  }
+
+  fn mut indent(depth: Int) {
+    depth.times fn (_) { @buffer.push(@indent) }
+  }
+
+  fn indent? -> Bool {
+    @indent.size > 0
+  }
+}

@@ -1,4 +1,67 @@
+# Generating of XML documents and elements.
 import std.string.(StringBuffer, ToString)
+
+let QUOTE = 34
+let AMP = 38
+let SEMI = 59
+let LT = 60
+let GT = 62
+
+# Escapes any XML/HTML entities in the input `String`.
+fn escape(input: String, quotes: Bool) -> String {
+  if escape?(input, quotes).false? { return input }
+
+  let buf = ByteArray.new
+  let bytes = input.bytes
+
+  loop {
+    match bytes.next_byte {
+      case AMP -> {
+        buf.push(AMP)
+        buf.push(97)
+        buf.push(109)
+        buf.push(112)
+        buf.push(SEMI)
+      }
+      case LT -> {
+        buf.push(AMP)
+        buf.push(108)
+        buf.push(116)
+        buf.push(SEMI)
+      }
+      case GT -> {
+        buf.push(AMP)
+        buf.push(103)
+        buf.push(116)
+        buf.push(SEMI)
+      }
+      case QUOTE if quotes -> {
+        buf.push(AMP)
+        buf.push(113)
+        buf.push(117)
+        buf.push(111)
+        buf.push(116)
+        buf.push(SEMI)
+      }
+      case -1 -> return buf.into_string
+      case byte -> buf.push(byte)
+    }
+  }
+}
+
+# Returns `true` if the input `String` needs to be escaped.
+fn escape?(input: String, quotes: Bool) -> Bool {
+  let bytes = input.bytes
+
+  loop {
+    match bytes.next_byte {
+      case AMP or LT or GT -> return true
+      case QUOTE if quotes -> return true
+      case -1 -> return false
+      case _ -> {}
+    }
+  }
+}
 
 # An XML document.
 class pub Document {
@@ -8,6 +71,25 @@ class pub Document {
   # Returns a new empty document.
   fn pub static new -> Document {
     Document { @children = [] }
+  }
+
+  # Creates a document and passes a mutable reference to the closure, returning
+  # the document afterwards.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Document
+  #
+  #     Document.with fn (doc) {
+  #       doc.element('person').then fn (person) {
+  #         person.element('name')
+  #       }
+  #     }
+  fn pub static with(func: fn (mut Document)) -> Document {
+    let doc = new
+
+    func.call(doc)
+    doc
   }
 
   # Adds an element with the given name this document.
@@ -228,7 +310,7 @@ class pub Generator {
   fn mut node(node: ref Node, depth: Int) {
     match node {
       case Element(el) -> element(el, depth)
-      case Text(v) -> @buffer.push(v)
+      case Text(v) -> @buffer.push(escape(v, quotes: false))
     }
   }
 
@@ -240,7 +322,7 @@ class pub Generator {
       @buffer.push(' ')
       @buffer.push(pair.key)
       @buffer.push('="')
-      @buffer.push(pair.value)
+      @buffer.push(escape(pair.value, quotes: true))
       @buffer.push('"')
     }
 
@@ -259,18 +341,22 @@ class pub Generator {
     if nl { @buffer.push("\n") }
 
     element.children.iter.each fn (child) {
-      if nl { @buffer.push(@indent.repeat(depth + 1)) }
+      if nl { indent(depth + 1) }
 
       node(child, depth + 1)
 
       if nl { @buffer.push("\n") }
     }
 
-    if nl { @buffer.push(@indent.repeat(depth)) }
+    if nl { indent(depth) }
 
     @buffer.push('</')
     @buffer.push(element.name)
     @buffer.push('>')
+  }
+
+  fn mut indent(depth: Int) {
+    depth.times fn (_) { @buffer.push(@indent) }
   }
 
   fn indent? -> Bool {
