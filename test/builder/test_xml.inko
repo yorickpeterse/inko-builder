@@ -1,0 +1,67 @@
+import std.test.Tests
+import builder.xml.Document
+
+fn pub tests(t: mut Tests) {
+  t.test('Document.to_string') fn (t) {
+    let doc = Document.new
+
+    doc.element('person').attr('verified', 'true').then fn (p) {
+      p.element('name').text('Alice')
+      p.element('address').then fn (a) {
+        a.element('city').text('Foo Town')
+        a.element('street').then fn (s) {
+          s.text('Foo')
+          s.element('strong').text('Street')
+        }
+        a.element('bla').self_closing
+      }
+    }
+
+    t.equal(
+      doc.to_string,
+      '\
+<?xml version="1.0" encoding="UTF-8" ?>\
+<person verified="true">\
+<name>Alice</name>\
+<address>\
+<city>Foo Town</city>\
+<street>Foo<strong>Street</strong></street>\
+<bla />\
+</address>\
+</person>'
+    )
+  }
+
+  t.test('Document.to_pretty_string') fn (t) {
+    let doc = Document.new
+
+    doc.element('person').attr('verified', 'true').then fn (p) {
+      p.element('name').text('Alice')
+      p.element('address').then fn (a) {
+        a.element('city').text('Foo Town')
+        a.element('street').then fn (s) {
+          s.text('Foo')
+          s.element('strong').text('Street')
+        }
+        a.element('bla').self_closing
+      }
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<?xml version="1.0" encoding="UTF-8" ?>
+<person verified="true">
+  <name>Alice</name>
+  <address>
+    <city>Foo Town</city>
+    <street>
+      Foo
+      <strong>Street</strong>
+    </street>
+    <bla />
+  </address>
+</person>'
+    )
+  }
+}

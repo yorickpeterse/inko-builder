@@ -1,0 +1,279 @@
+import std.string.(StringBuffer, ToString)
+
+# An XML document.
+class pub Document {
+  # All top-level nodes in this document.
+  let pub @children: Array[Node]
+
+  # Returns a new empty document.
+  fn pub static new -> Document {
+    Document { @children = [] }
+  }
+
+  # Adds an element with the given name this document.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Document
+  #
+  #     Document.new.element('foo')
+  fn pub mut element(name: String) -> mut Element {
+    let el = Element.new(name)
+    let ret = mut el
+
+    @children.push(Node.Element(el))
+    ret
+  }
+
+  # Returns an indented `String` containing the XML representation of `self`.
+  #
+  # This method uses two spaces for indentation. If you want to customize the
+  # indentation, use the `Generator` type directly instead.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Document
+  #
+  #     let doc = Document.new
+  #
+  #     doc.element('person')
+  #     doc.to_pretty_string # => "<person>\n</person>"
+  fn pub to_pretty_string -> String {
+    Generator.new(indent: '  ').generate(self)
+  }
+}
+
+impl ToString for Document {
+  # Returns a `String` containing the XML representation of `self`.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Document
+  #
+  #     let doc = Document.new
+  #
+  #     doc.element('person')
+  #     doc.to_string # => '<person></person>'
+  fn pub to_string -> String {
+    Generator.new(indent: '').generate(self)
+  }
+}
+
+# A node in an XML document.
+class pub enum Node {
+  # The node is an element, i.e. `<foo></foo>`.
+  case Element(Element)
+
+  # The node is a text node.
+  case Text(String)
+}
+
+# A named XML element.
+class pub Element {
+  # The name of this element.
+  let pub @name: String
+
+  # The attributes of this element.
+  let pub @attributes: Map[String, String]
+
+  # The child nodes of this element.
+  let pub @children: Array[Node]
+
+  # A flag that signals this element is a self-closing element.
+  let @self_closing: Bool
+
+  # Returns a new element with the given name.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     Element.new('person')
+  fn pub static new(name: String) -> Element {
+    Element {
+      @name = name,
+      @attributes = Map.new,
+      @children = [],
+      @self_closing = false,
+    }
+  }
+
+  # Adds a child element with the given name.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     Element.new('person').element('name')
+  fn pub mut element(name: String) -> mut Element {
+    let el = Element.new(name)
+    let ret = mut el
+
+    @children.push(Node.Element(el))
+    ret
+  }
+
+  # Adds an attribute to this element.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     Element.new('user').attr('verified', 'true')
+  fn pub mut attr(name: String, value: String) -> mut Element {
+    @attributes.set(name, value)
+    self
+  }
+
+  # Calls the supplied closure, passing it a mutable reference to this element.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     Element.new('person').then fn (person) {
+  #       person.element('name')
+  #     }
+  fn pub mut then(func: fn (mut Element)) -> mut Element {
+    func.call(self)
+    self
+  }
+
+  # Adds a text node to this element.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     Element.new('p').text('Hello!')
+  fn pub mut text(text: String) {
+    @children.push(Node.Text(text))
+  }
+
+  # Marks this element as being a self-closing element.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     Element.new('link').self_closing
+  fn pub mut self_closing -> mut Element {
+    @self_closing = true
+    self
+  }
+
+  # Returns `true` if this element is a self-closing element.
+  #
+  # # Examples
+  #
+  #     import builder.xml.Element
+  #
+  #     let el = Element.new('link')
+  #
+  #     el.self_closing
+  #     el.self_closing? # => true
+  fn pub self_closing? -> Bool {
+    @self_closing
+  }
+}
+
+# A type for generating an XML `String` from a `Document`.
+class pub Generator {
+  let @buffer: StringBuffer
+  let @indent: String
+
+  # Returns a new `Generator` that formats the XML with the given indentation
+  #
+  # # Examples
+  #
+  # Generating XML without any indentation:
+  #
+  #     import builder.xml.(Document, Generator)
+  #
+  #     let doc = Document.new
+  #
+  #     doc.element('person').then fn (p) { p.element('name') }
+  #
+  #     Generator
+  #       .new(indent: '')
+  #       .generate(doc) # => '<person><name></name></person>'
+  #
+  # Using two spaces for indentation:
+  #
+  #     import builder.xml.(Document, Generator)
+  #
+  #     let doc = Document.new
+  #
+  #     doc.element('person').then fn (p) { p.element('name') }
+  #
+  #     Generator
+  #       .new(indent: '  ')
+  #       .generate(doc) # => "<person>\n  <name></name>\n</person>"
+  fn pub static new(indent: String) -> Generator {
+    Generator { @buffer = StringBuffer.new, @indent = indent }
+  }
+
+  # Returns a `String` containing the XML representation of the given document.
+  fn pub move generate(document: ref Document) -> String {
+    # Inko Strings are UTF-8, so by definition the generated document is also in
+    # UTF-8.
+    @buffer.push('<?xml version="1.0" encoding="UTF-8" ?>')
+
+    if indent? { @buffer.push("\n") }
+
+    document.children.iter.each fn (node) { node(node, depth: 0) }
+    @buffer.into_string
+  }
+
+  fn mut node(node: ref Node, depth: Int) {
+    match node {
+      case Element(el) -> element(el, depth)
+      case Text(v) -> @buffer.push(v)
+    }
+  }
+
+  fn mut element(element: ref Element, depth: Int) {
+    @buffer.push('<')
+    @buffer.push(element.name)
+
+    element.attributes.iter.each fn (pair) {
+      @buffer.push(' ')
+      @buffer.push(pair.key)
+      @buffer.push('="')
+      @buffer.push(pair.value)
+      @buffer.push('"')
+    }
+
+    if element.self_closing? and element.children.empty? {
+      @buffer.push(' />')
+      return
+    }
+
+    @buffer.push('>')
+
+    let nl = match element.children.opt(0) {
+      case Some(Text(_)) if element.children.size == 1 -> false
+      case _ -> indent?
+    }
+
+    if nl { @buffer.push("\n") }
+
+    element.children.iter.each fn (child) {
+      if nl { @buffer.push(@indent.repeat(depth + 1)) }
+
+      node(child, depth + 1)
+
+      if nl { @buffer.push("\n") }
+    }
+
+    if nl { @buffer.push(@indent.repeat(depth)) }
+
+    @buffer.push('</')
+    @buffer.push(element.name)
+    @buffer.push('>')
+  }
+
+  fn indent? -> Bool {
+    @indent.size > 0
+  }
+}
