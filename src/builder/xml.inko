@@ -15,27 +15,27 @@ fn escape(input: String, quotes: Bool) -> String {
   let bytes = input.bytes
 
   loop {
-    match bytes.next_byte {
-      case AMP -> {
+    match bytes.next {
+      case Some(AMP) -> {
         buf.push(AMP)
         buf.push(97)
         buf.push(109)
         buf.push(112)
         buf.push(SEMI)
       }
-      case LT -> {
+      case Some(LT) -> {
         buf.push(AMP)
         buf.push(108)
         buf.push(116)
         buf.push(SEMI)
       }
-      case GT -> {
+      case Some(GT) -> {
         buf.push(AMP)
         buf.push(103)
         buf.push(116)
         buf.push(SEMI)
       }
-      case QUOTE if quotes -> {
+      case Some(QUOTE) if quotes -> {
         buf.push(AMP)
         buf.push(113)
         buf.push(117)
@@ -43,8 +43,8 @@ fn escape(input: String, quotes: Bool) -> String {
         buf.push(116)
         buf.push(SEMI)
       }
-      case -1 -> return buf.into_string
-      case byte -> buf.push(byte)
+      case Some(byte) -> buf.push(byte)
+      case _ -> return buf.into_string
     }
   }
 }
@@ -54,11 +54,11 @@ fn escape?(input: String, quotes: Bool) -> Bool {
   let bytes = input.bytes
 
   loop {
-    match bytes.next_byte {
-      case AMP or LT or GT -> return true
-      case QUOTE if quotes -> return true
-      case -1 -> return false
-      case _ -> {}
+    match bytes.next {
+      case Some(AMP or LT or GT) -> return true
+      case Some(QUOTE) if quotes -> return true
+      case Some(_) -> {}
+      case _ -> return false
     }
   }
 }
