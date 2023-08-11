@@ -389,6 +389,31 @@ trait pub Builder {
     element('h1')
   }
 
+  # Adds a `<h2>` element as a child element.
+  fn pub mut h2 -> mut Element {
+    element('h2')
+  }
+
+  # Adds a `<h3>` element as a child element.
+  fn pub mut h3 -> mut Element {
+    element('h3')
+  }
+
+  # Adds a `<h4>` element as a child element.
+  fn pub mut h4 -> mut Element {
+    element('h4')
+  }
+
+  # Adds a `<h5>` element as a child element.
+  fn pub mut h5 -> mut Element {
+    element('h5')
+  }
+
+  # Adds a `<h6>` element as a child element.
+  fn pub mut h6 -> mut Element {
+    element('h6')
+  }
+
   # Adds a `<head>` element as a child element.
   fn pub mut head -> mut Element {
     element('head')
