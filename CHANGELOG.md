@@ -4,6 +4,13 @@
 
 <!-- new section -->
 
+## 0.3.0 (2023-08-11)
+
+### Added
+
+* [df766b9](https://github.com/yorickpeterse/inko-builder/commit/df766b9): Allow generating of HTML fragments
+* [378335f](https://github.com/yorickpeterse/inko-builder/commit/378335f): Add missing heading methods to html.Builder
+
 ## 0.2.0 (2023-08-11)
 
 No changes
