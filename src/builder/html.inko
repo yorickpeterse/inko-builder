@@ -2,16 +2,24 @@
 import builder.xml.(escape)
 import std.string.(StringBuffer, ToString)
 
-# An HTML5 document.
+# A container for HTML nodes
+#
+# A `Document` defaults to being treated as a whole HTML5 document (i.e. with a
+# doctype), but this can be disabled by setting `Document.fragment` to `true`.
 class pub Document {
   # All top-level nodes in this document.
   let pub @children: Array[Node]
 
+  # If the document is to be treated as a document, or just a fragment.
+  #
+  # Setting this field to `true` allows you to bundle nodes together and
+  # serialize them to a `String`, but without including a doctype.
+  let pub @fragment: Bool
+
   # Returns a new empty document.
   fn pub static new -> Document {
-    Document { @children = [] }
+    Document { @children = [], @fragment = false }
   }
-
 
   # Creates a document and passes a mutable reference to the closure, returning
   # the document afterwards.
@@ -810,9 +818,11 @@ class pub Generator {
   fn pub move generate(document: ref Document) -> String {
     # There's not really a reason to use any other doctype for HTML5, so we just
     # don't bother supporting anything else.
-    @buffer.push('<!DOCTYPE html>')
+    if document.fragment.false? {
+      @buffer.push('<!DOCTYPE html>')
 
-    if indent? { @buffer.push("\n") }
+      if indent? { @buffer.push("\n") }
+    }
 
     document.children.iter.each fn (node) { node(node, depth: 0) }
     @buffer.into_string
