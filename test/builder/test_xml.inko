@@ -62,8 +62,24 @@ fn pub tests(t: mut Tests) {
     </street>
     <bla />
   </address>
-</person>\
-      '
+</person>
+'
+    )
+  }
+
+  t.test('Document.to_pretty_string with two root elements') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.element('a').text('foo')
+      doc.element('b').text('bar')
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<?xml version="1.0" encoding="UTF-8" ?>
+<a>foo</a>
+<b>bar</b>
+'
     )
   }
 

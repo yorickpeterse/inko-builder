@@ -68,8 +68,24 @@ fn pub tests(t: mut Tests) {
       <strong>world</strong>
     </p>
   </body>
-</html>\
-      '
+</html>
+'
+    )
+  }
+
+  t.test('Document.to_pretty_string with two root elements') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.h1.text('foo')
+      doc.p.text('bar')
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<!DOCTYPE html>
+<h1>foo</h1>
+<p>bar</p>
+'
     )
   }
 

@@ -353,6 +353,8 @@ class pub Generator {
     @buffer.push('</')
     @buffer.push(element.name)
     @buffer.push('>')
+
+    if depth == 0 and indent? { @buffer.push("\n") }
   }
 
   fn mut indent(depth: Int) {
