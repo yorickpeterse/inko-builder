@@ -866,7 +866,12 @@ class pub Generator {
 
       node(child, depth + 1)
 
-      if nl { @buffer.push("\n") }
+      let has_nl = match child {
+        case Text(v) -> v.ends_with?("\n")
+        case _ -> false
+      }
+
+      if nl and has_nl.false? { @buffer.push("\n") }
     }
 
     if nl { indent(depth) }

@@ -83,6 +83,26 @@ fn pub tests(t: mut Tests) {
     )
   }
 
+  t.test('Document.to_pretty_string with multiple text nodes with newlines') fn (t) {
+    let doc = Document.with fn (doc) {
+      let p = doc.element('p')
+
+      p.text("foo\n")
+      p.text("bar\n")
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<?xml version="1.0" encoding="UTF-8" ?>
+<p>
+  foo
+  bar
+</p>
+'
+    )
+  }
+
   t.test('Document.to_string with text to escape') fn (t) {
     let doc = Document.with fn (doc) { doc.element('name').text('&><') }
 
