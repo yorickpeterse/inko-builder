@@ -4,6 +4,14 @@
 
 <!-- new section -->
 
+## 0.4.0 (2023-08-19)
+
+### Fixed
+
+* [cfd3a5c](https://github.com/yorickpeterse/inko-builder/commit/cfd3a5c): Fix indenting/newlines for consecutive text nodes
+* [1d12760](https://github.com/yorickpeterse/inko-builder/commit/1d12760): Don't add redundant newlines to text nodes
+* [ad3a1d9](https://github.com/yorickpeterse/inko-builder/commit/ad3a1d9): Fix generating XML/HTML for multiple root elements
+
 ## 0.3.0 (2023-08-11)
 
 ### Added
