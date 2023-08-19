@@ -83,6 +83,23 @@ fn pub tests(t: mut Tests) {
     )
   }
 
+  t.test('Document.to_pretty_string with multiple text nodes') fn (t) {
+    let doc = Document.with fn (doc) {
+      let p = doc.element('p')
+
+      p.text('foo ')
+      p.text('bar')
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<?xml version="1.0" encoding="UTF-8" ?>
+<p>foo bar</p>
+'
+    )
+  }
+
   t.test('Document.to_pretty_string with multiple text nodes with newlines') fn (t) {
     let doc = Document.with fn (doc) {
       let p = doc.element('p')
@@ -95,9 +112,29 @@ fn pub tests(t: mut Tests) {
       doc.to_pretty_string,
       '\
 <?xml version="1.0" encoding="UTF-8" ?>
+<p>foo
+bar
+</p>
+'
+    )
+  }
+
+  t.test('Document.to_pretty_string with multiple text nodes and an element') fn (t) {
+    let doc = Document.with fn (doc) {
+      let p = doc.element('p')
+
+      p.text('foo ')
+      p.text('bar')
+      p.element('strong').text('test')
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<?xml version="1.0" encoding="UTF-8" ?>
 <p>
-  foo
-  bar
+  foo bar
+  <strong>test</strong>
 </p>
 '
     )

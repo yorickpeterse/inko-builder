@@ -854,24 +854,39 @@ class pub Generator {
 
     @buffer.push('>')
 
-    let nl = match element.children.opt(0) {
-      case Some(Text(_)) if element.children.size == 1 -> false
-      case _ -> indent?
+    let all_text = element.children.iter.all? fn (n) {
+      match n {
+        case Text(_) -> true
+        case _ -> false
+      }
     }
+
+    let nl = all_text.false? and indent?
 
     if nl { @buffer.push("\n") }
 
-    element.children.iter.each fn (child) {
-      if nl { indent(depth + 1) }
+    element.children.iter.each_with_index fn (index, child) {
+      let add_indent = match child {
+        case Element(_) -> true
+        case Text(_) -> match element.children.opt(index - 1) {
+          case Some(Text(_)) -> false
+          case _ -> true
+        }
+      }
+
+      let add_nl = match child {
+        case Element(_) -> true
+        case Text(v) -> match element.children.opt(index + 1) {
+          case Some(Text(_)) -> false
+          case _ -> v.ends_with?("\n").false?
+        }
+      }
+
+      if nl and add_indent { indent(depth + 1) }
 
       node(child, depth + 1)
 
-      let has_nl = match child {
-        case Text(v) -> v.ends_with?("\n")
-        case _ -> false
-      }
-
-      if nl and has_nl.false? { @buffer.push("\n") }
+      if nl and add_nl { @buffer.push("\n") }
     }
 
     if nl { indent(depth) }
