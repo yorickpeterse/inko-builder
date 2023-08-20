@@ -333,21 +333,43 @@ class pub Generator {
 
     @buffer.push('>')
 
-    let all_text = element.children.iter.all? fn (n) {
-      match n {
-        case Text(_) -> true
-        case _ -> false
+    # Whitespace inside nodes has meaning in XML, and as such we can only safely
+    # indent child nodes if all of them are an element.
+    let indent = if indent? {
+      element.children.iter.all? fn (node) {
+        match node {
+          case Element(_) -> true
+          case _ -> false
+        }
       }
+    } else {
+      false
     }
 
-    let nl = all_text.false? and indent?
+    if indent {
+      with_indent(element.children, depth)
+    } else {
+      without_indent(element.children, depth)
+    }
 
-    if nl { @buffer.push("\n") }
+    @buffer.push('</')
+    @buffer.push(element.name)
+    @buffer.push('>')
 
-    element.children.iter.each_with_index fn (index, child) {
+    if depth == 0 and indent? { @buffer.push("\n") }
+  }
+
+  fn mut without_indent(nodes: ref Array[Node], depth: Int) {
+    nodes.iter.each_with_index fn (index, child) { node(child, depth + 1) }
+  }
+
+  fn mut with_indent(nodes: ref Array[Node], depth: Int) {
+    @buffer.push("\n")
+
+    nodes.iter.each_with_index fn (index, child) {
       let add_indent = match child {
         case Element(_) -> true
-        case Text(_) -> match element.children.opt(index - 1) {
+        case Text(_) -> match nodes.opt(index - 1) {
           case Some(Text(_)) -> false
           case _ -> true
         }
@@ -355,26 +377,20 @@ class pub Generator {
 
       let add_nl = match child {
         case Element(_) -> true
-        case Text(v) -> match element.children.opt(index + 1) {
+        case Text(v) -> match nodes.opt(index + 1) {
           case Some(Text(_)) -> false
           case _ -> v.ends_with?("\n").false?
         }
       }
 
-      if nl and add_indent { indent(depth + 1) }
+      if add_indent { indent(depth + 1) }
 
       node(child, depth + 1)
 
-      if nl and add_nl { @buffer.push("\n") }
+      if add_nl { @buffer.push("\n") }
     }
 
-    if nl { indent(depth) }
-
-    @buffer.push('</')
-    @buffer.push(element.name)
-    @buffer.push('>')
-
-    if depth == 0 and indent? { @buffer.push("\n") }
+    indent(depth)
   }
 
   fn mut indent(depth: Int) {

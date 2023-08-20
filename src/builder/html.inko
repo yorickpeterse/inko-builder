@@ -103,6 +103,9 @@ class pub Element {
   # If the element is a self-closing element.
   let pub @self_closing: Bool
 
+  # If the element should be formatted as an inline element.
+  let pub @inline: Bool
+
   # Returns a new element with the given name.
   #
   # # Examples
@@ -116,6 +119,7 @@ class pub Element {
       @attributes = Map.new,
       @children = [],
       @self_closing = false,
+      @inline = false,
     }
   }
 
@@ -168,6 +172,12 @@ class pub Element {
     self
   }
 
+  # Marks this element as an inline element.
+  fn pub mut inline -> mut Element {
+    @inline = true
+    self
+  }
+
   # Returns `true` if this element is a self-closing element.
   #
   # # Examples
@@ -204,22 +214,22 @@ trait pub Builder {
 
   # Adds a `<a>` element as a child element.
   fn pub mut a -> mut Element {
-    element('a')
+    element('a').inline
   }
 
   # Adds a `<abbr>` element as a child element.
   fn pub mut abbr -> mut Element {
-    element('abbr')
+    element('abbr').inline
   }
 
   # Adds a `<address>` element as a child element.
   fn pub mut address -> mut Element {
-    element('address')
+    element('address').inline
   }
 
   # Adds a `<area>` element as a child element.
   fn pub mut area -> mut Element {
-    element('area').self_closing
+    element('area').self_closing.inline
   }
 
   # Adds a `<article>` element as a child element.
@@ -234,12 +244,12 @@ trait pub Builder {
 
   # Adds a `<audio>` element as a child element.
   fn pub mut audio -> mut Element {
-    element('audio')
+    element('audio').inline
   }
 
   # Adds a `<b>` element as a child element.
   fn pub mut b -> mut Element {
-    element('b')
+    element('b').inline
   }
 
   # Adds a `<base>` element as a child element.
@@ -289,12 +299,12 @@ trait pub Builder {
 
   # Adds a `<cite>` element as a child element.
   fn pub mut cite -> mut Element {
-    element('cite')
+    element('cite').inline
   }
 
   # Adds a `<code>` element as a child element.
   fn pub mut code -> mut Element {
-    element('code')
+    element('code').inline
   }
 
   # Adds a `<col>` element as a child element.
@@ -324,7 +334,7 @@ trait pub Builder {
 
   # Adds a `<del>` element as a child element.
   fn pub mut del -> mut Element {
-    element('del')
+    element('del').inline
   }
 
   # Adds a `<details>` element as a child element.
@@ -334,7 +344,7 @@ trait pub Builder {
 
   # Adds a `<dfn>` element as a child element.
   fn pub mut dfn -> mut Element {
-    element('dfn')
+    element('dfn').inline
   }
 
   # Adds a `<dialog>` element as a child element.
@@ -359,7 +369,7 @@ trait pub Builder {
 
   # Adds a `<em>` element as a child element.
   fn pub mut em -> mut Element {
-    element('em')
+    element('em').inline
   }
 
   # Adds a `<embed>` element as a child element.
@@ -449,7 +459,7 @@ trait pub Builder {
 
   # Adds a `<i>` element as a child element.
   fn pub mut i -> mut Element {
-    element('i')
+    element('i').inline
   }
 
   # Adds a `<iframe>` element as a child element.
@@ -459,7 +469,7 @@ trait pub Builder {
 
   # Adds a `<img>` element as a child element.
   fn pub mut img -> mut Element {
-    element('img').self_closing
+    element('img').self_closing.inline
   }
 
   # Adds a `<input>` element as a child element.
@@ -469,12 +479,12 @@ trait pub Builder {
 
   # Adds a `<ins>` element as a child element.
   fn pub mut ins -> mut Element {
-    element('ins')
+    element('ins').inline
   }
 
   # Adds a `<kbd>` element as a child element.
   fn pub mut kbd -> mut Element {
-    element('kbd')
+    element('kbd').inline
   }
 
   # Adds a `<label>` element as a child element.
@@ -484,7 +494,7 @@ trait pub Builder {
 
   # Adds a `<legend>` element as a child element.
   fn pub mut legend -> mut Element {
-    element('legend')
+    element('legend').inline
   }
 
   # Adds a `<li>` element as a child element.
@@ -509,7 +519,7 @@ trait pub Builder {
 
   # Adds a `<mark>` element as a child element.
   fn pub mut mark -> mut Element {
-    element('mark')
+    element('mark').inline
   }
 
   # Adds a `<menu>` element as a child element.
@@ -524,7 +534,7 @@ trait pub Builder {
 
   # Adds a `<meter>` element as a child element.
   fn pub mut meter -> mut Element {
-    element('meter')
+    element('meter').inline
   }
 
   # Adds a `<nav>` element as a child element.
@@ -594,7 +604,7 @@ trait pub Builder {
 
   # Adds a `<q>` element as a child element.
   fn pub mut q -> mut Element {
-    element('q')
+    element('q').inline
   }
 
   # Adds a `<rp>` element as a child element.
@@ -649,22 +659,22 @@ trait pub Builder {
 
   # Adds a `<small>` element as a child element.
   fn pub mut small -> mut Element {
-    element('small')
+    element('small').inline
   }
 
   # Adds a `<source>` element as a child element.
   fn pub mut source -> mut Element {
-    element('source').self_closing
+    element('source').self_closing.inline
   }
 
   # Adds a `<span>` element as a child element.
   fn pub mut span -> mut Element {
-    element('span')
+    element('span').inline
   }
 
   # Adds a `<strong>` element as a child element.
   fn pub mut strong -> mut Element {
-    element('strong')
+    element('strong').inline
   }
 
   # Adds a `<style>` element as a child element.
@@ -674,17 +684,17 @@ trait pub Builder {
 
   # Adds a `<sub>` element as a child element.
   fn pub mut sub -> mut Element {
-    element('sub')
+    element('sub').inline
   }
 
   # Adds a `<summary>` element as a child element.
   fn pub mut summary -> mut Element {
-    element('summary')
+    element('summary').inline
   }
 
   # Adds a `<sup>` element as a child element.
   fn pub mut sup -> mut Element {
-    element('sup')
+    element('sup').inline
   }
 
   # Adds a `<table>` element as a child element.
@@ -729,7 +739,7 @@ trait pub Builder {
 
   # Adds a `<time>` element as a child element.
   fn pub mut time -> mut Element {
-    element('time')
+    element('time').inline
   }
 
   # Adds a `<title>` element as a child element.
@@ -759,7 +769,7 @@ trait pub Builder {
 
   # Adds a `<var>` element as a child element.
   fn pub mut var -> mut Element {
-    element('var')
+    element('var').inline
   }
 
   # Adds a `<video>` element as a child element.
@@ -854,48 +864,67 @@ class pub Generator {
 
     @buffer.push('>')
 
-    let all_text = element.children.iter.all? fn (n) {
-      match n {
-        case Text(_) -> true
-        case _ -> false
-      }
-    }
-
-    let nl = all_text.false? and indent?
-
-    if nl { @buffer.push("\n") }
-
-    element.children.iter.each_with_index fn (index, child) {
-      let add_indent = match child {
-        case Element(_) -> true
-        case Text(_) -> match element.children.opt(index - 1) {
-          case Some(Text(_)) -> false
-          case _ -> true
+    let indent = if indent? {
+      element.children.iter.any? fn (node) {
+        match node {
+          case Element({ @inline = false }) -> true
+          case _ -> false
         }
       }
-
-      let add_nl = match child {
-        case Element(_) -> true
-        case Text(v) -> match element.children.opt(index + 1) {
-          case Some(Text(_)) -> false
-          case _ -> v.ends_with?("\n").false?
-        }
-      }
-
-      if nl and add_indent { indent(depth + 1) }
-
-      node(child, depth + 1)
-
-      if nl and add_nl { @buffer.push("\n") }
+    } else {
+      false
     }
 
-    if nl { indent(depth) }
+    if indent {
+      with_indent(element.children, depth)
+    } else {
+      without_indent(element.children, depth)
+    }
 
     @buffer.push('</')
     @buffer.push(element.name)
     @buffer.push('>')
 
     if depth == 0 and indent? { @buffer.push("\n") }
+  }
+
+  fn mut without_indent(nodes: ref Array[Node], depth: Int) {
+    nodes.iter.each_with_index fn (index, child) { node(child, depth + 1) }
+  }
+
+  fn mut with_indent(nodes: ref Array[Node], depth: Int) {
+    @buffer.push("\n")
+
+    nodes.iter.each_with_index fn (index, child) {
+      let add_indent = match child {
+        case Element({ @inline = true }) -> index == 0
+        case Text(_) -> match nodes.opt(index - 1) {
+          case Some(Text(_) or Element({ @inline = true })) -> false
+          case _ -> true
+        }
+        case _ -> true
+      }
+
+      let add_nl = match child {
+        case Element({ @inline = true }) -> match nodes.opt(index + 1) {
+          case Some(Element({ @inline = false })) -> true
+          case _ -> false
+        }
+        case Text(v) -> match nodes.opt(index + 1) {
+          case Some(Text(_) or Element({ @inline = true })) -> false
+          case _ -> v.ends_with?("\n").false?
+        }
+        case _ -> true
+      }
+
+      if add_indent { indent(depth + 1) }
+
+      node(child, depth + 1)
+
+      if add_nl { @buffer.push("\n") }
+    }
+
+    indent(depth)
   }
 
   fn mut indent(depth: Int) {

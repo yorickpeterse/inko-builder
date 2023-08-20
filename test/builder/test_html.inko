@@ -63,10 +63,7 @@ fn pub tests(t: mut Tests) {
     <link href="foo" />
   </head>
   <body>
-    <p>
-      hello
-      <strong>world</strong>
-    </p>
+    <p>hello<strong>world</strong></p>
   </body>
 </html>
 '
@@ -138,10 +135,59 @@ bar
       doc.to_pretty_string,
       '\
 <!DOCTYPE html>
-<p>
-  foo bar
-  <strong>test</strong>
-</p>
+<p>foo bar<strong>test</strong></p>
+'
+    )
+  }
+
+  t.test('Document.to_pretty_string with inline and block elements, and text') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.body.then fn (body) {
+        body.p.then fn (p) {
+          p.text('foo')
+          p.strong.text('bar')
+          p.text('baz')
+        }
+
+        body.text('bla')
+        body.ul.then fn (ul) {
+          ul.strong.text('list start')
+          ul.li.text('foo')
+          ul.li.then fn (li) {
+            li.text('bar')
+            li.text(' bar')
+            li.strong.text('inline')
+
+            li.ul.then fn (ul) {
+              ul.text('before')
+              ul.li.text('baz')
+              ul.text('after')
+            }
+          }
+        }
+      }
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<!DOCTYPE html>
+<body>
+  <p>foo<strong>bar</strong>baz</p>
+  bla
+  <ul>
+    <strong>list start</strong>
+    <li>foo</li>
+    <li>
+      bar bar<strong>inline</strong>
+      <ul>
+        before
+        <li>baz</li>
+        after
+      </ul>
+    </li>
+  </ul>
+</body>
 '
     )
   }

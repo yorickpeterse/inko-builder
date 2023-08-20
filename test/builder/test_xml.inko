@@ -56,10 +56,7 @@ fn pub tests(t: mut Tests) {
   <name>Alice</name>
   <address>
     <city>Foo Town</city>
-    <street>
-      Foo
-      <strong>Street</strong>
-    </street>
+    <street>Foo<strong>Street</strong></street>
     <bla />
   </address>
 </person>
@@ -121,21 +118,27 @@ bar
 
   t.test('Document.to_pretty_string with multiple text nodes and an element') fn (t) {
     let doc = Document.with fn (doc) {
-      let p = doc.element('p')
+      doc.element('first').then fn (el) {
+        el.element('a').text('foo')
+        el.text('.')
+        el.element('b').text('bar')
+      }
 
-      p.text('foo ')
-      p.text('bar')
-      p.element('strong').text('test')
+      doc.element('second').then fn (el) {
+        el.element('a').text('foo')
+        el.element('b').text('bar')
+      }
     }
 
     t.equal(
       doc.to_pretty_string,
       '\
 <?xml version="1.0" encoding="UTF-8" ?>
-<p>
-  foo bar
-  <strong>test</strong>
-</p>
+<first><a>foo</a>.<b>bar</b></first>
+<second>
+  <a>foo</a>
+  <b>bar</b>
+</second>
 '
     )
   }
