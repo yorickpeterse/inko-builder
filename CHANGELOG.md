@@ -4,6 +4,12 @@
 
 <!-- new section -->
 
+## 0.5.0 (2023-08-20)
+
+### Fixed
+
+* [a97bed4](https://github.com/yorickpeterse/inko-builder/commit/a97bed4): Further improve pretty formatting
+
 ## 0.4.0 (2023-08-19)
 
 ### Fixed
