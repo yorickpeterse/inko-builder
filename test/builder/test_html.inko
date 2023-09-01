@@ -192,6 +192,42 @@ bar
     )
   }
 
+  t.test('Document.to_pretty_string with a hr followed by a heading, at the top') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.hr
+      doc.h1.text('hello')
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<!DOCTYPE html>
+<hr />
+<h1>hello</h1>
+'
+    )
+  }
+
+  t.test('Document.to_pretty_string with a hr followed by a heading') fn (t) {
+    let doc = Document.with fn (doc) {
+      doc.div.then fn (div) {
+        div.hr
+        div.h1.text('hello')
+      }
+    }
+
+    t.equal(
+      doc.to_pretty_string,
+      '\
+<!DOCTYPE html>
+<div>
+  <hr />
+  <h1>hello</h1>
+</div>
+'
+    )
+  }
+
   t.test('Document.to_string with text to escape') fn (t) {
     let doc = Document.with fn (doc) { doc.p.text('&><') }
 

@@ -859,6 +859,7 @@ class pub Generator {
 
     if element.self_closing? and element.children.empty? {
       @buffer.push(' />')
+      closing_newline(depth)
       return
     }
 
@@ -884,8 +885,7 @@ class pub Generator {
     @buffer.push('</')
     @buffer.push(element.name)
     @buffer.push('>')
-
-    if depth == 0 and indent? { @buffer.push("\n") }
+    closing_newline(depth)
   }
 
   fn mut without_indent(nodes: ref Array[Node], depth: Int) {
@@ -929,6 +929,10 @@ class pub Generator {
 
   fn mut indent(depth: Int) {
     depth.times fn (_) { @buffer.push(@indent) }
+  }
+
+  fn mut closing_newline(depth: Int) {
+    if depth == 0 and indent? { @buffer.push("\n") }
   }
 
   fn indent? -> Bool {
