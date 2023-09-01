@@ -4,6 +4,12 @@
 
 <!-- new section -->
 
+## 0.6.0 (2023-09-01)
+
+### Fixed
+
+* [77bfd8c](https://github.com/yorickpeterse/inko-builder/commit/77bfd8c): Fix newlines for self closing elements
+
 ## 0.5.0 (2023-08-20)
 
 ### Fixed
