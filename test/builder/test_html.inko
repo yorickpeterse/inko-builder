@@ -282,4 +282,10 @@ bar
 
     t.equal(doc.to_string, '<!DOCTYPE html><h6>foo</h6>')
   }
+
+  t.test('Builder.text') fn (t) {
+    let doc = Document.with fn (doc) { doc.p.text('a').attr('class', 'b') }
+
+    t.equal(doc.to_string, '<!DOCTYPE html><p class="b">a</p>')
+  }
 }

@@ -228,8 +228,9 @@ class pub Element {
   #     import builder.xml.Element
   #
   #     Element.new('p').text('Hello!')
-  fn pub mut text(text: String) {
+  fn pub mut text(text: String) -> mut Element {
     @children.push(Node.Text(text))
+    self
   }
 
   # Marks this element as being a self-closing element.

@@ -160,4 +160,14 @@ bar
       '<?xml version="1.0" encoding="UTF-8" ?><name foo="a&quot;b"></name>'
     )
   }
+
+  t.test('Builder.text') fn (t) {
+    let doc =
+      Document.with fn (doc) { doc.element('p').text('a').attr('class', 'b') }
+
+    t.equal(
+      doc.to_string,
+      '<?xml version="1.0" encoding="UTF-8" ?><p class="b">a</p>'
+    )
+  }
 }
