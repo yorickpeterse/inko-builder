@@ -4,6 +4,12 @@
 
 <!-- new section -->
 
+## 0.7.0 (2023-09-04)
+
+### Changed
+
+* [948fb4a](https://github.com/yorickpeterse/inko-builder/commit/948fb4a): Return self in Element.text()
+
 ## 0.6.0 (2023-09-01)
 
 ### Fixed
