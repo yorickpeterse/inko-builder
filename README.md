@@ -7,12 +7,12 @@ Ruby.
 
 # Requirements
 
-- Inko `main` (for now)
+- Inko 0.13.1 or newer
 
 # Installation
 
 ```bash
-inko pkg add github.com/yorickpeterse/inko-builder 0.1.0
+inko pkg add github.com/yorickpeterse/inko-builder 0.7.0
 inko pkg sync
 ```
 
