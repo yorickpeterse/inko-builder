@@ -29,7 +29,7 @@ class pub Document {
   #     import builder.html.Document
   #
   #     Document.with fn (doc) {
-  #       doc.head.then fn (head) {
+  #       doc.head.with fn (head) {
   #         head.title.text('Hello')
   #       }
   #     }
@@ -141,10 +141,10 @@ class pub Element {
   #
   #     import builder.html.Element
   #
-  #     Element.new('person').then fn (person) {
+  #     Element.new('person').with fn (person) {
   #       person.element('name')
   #     }
-  fn pub mut then(func: fn (mut Element)) -> mut Element {
+  fn pub mut with(func: fn (mut Element)) -> mut Element {
     func.call(self)
     self
   }
@@ -804,7 +804,7 @@ class pub Generator {
   #
   #     let doc = Document.new
   #
-  #     doc.body.then fn (body) { body.p.text('hello') }
+  #     doc.body.with fn (body) { body.p.text('hello') }
   #
   #     Generator
   #       .new(indent: '')
@@ -816,7 +816,7 @@ class pub Generator {
   #
   #     let doc = Document.new
   #
-  #     doc.body.then fn (body) { body.p.text('hello') }
+  #     doc.body.with fn (body) { body.p.text('hello') }
   #
   #     Generator
   #       .new(indent: '  ')

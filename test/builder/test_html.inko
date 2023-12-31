@@ -4,14 +4,14 @@ import builder.html.Document
 fn pub tests(t: mut Tests) {
   t.test('Document.to_string') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.html.then fn (html) {
-        html.head.then fn (head) {
+      doc.html.with fn (html) {
+        html.head.with fn (head) {
           head.title.text('Testing')
           head.link.attr('href', 'foo')
         }
 
-        html.body.then fn (body) {
-          body.p.then fn (p) {
+        html.body.with fn (body) {
+          body.p.with fn (p) {
             p.text('hello')
             p.strong.text('world')
           }
@@ -38,14 +38,14 @@ fn pub tests(t: mut Tests) {
 
   t.test('Document.to_pretty_string') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.html.then fn (html) {
-        html.head.then fn (head) {
+      doc.html.with fn (html) {
+        html.head.with fn (head) {
           head.title.text('Testing')
           head.link.attr('href', 'foo')
         }
 
-        html.body.then fn (body) {
-          body.p.then fn (p) {
+        html.body.with fn (body) {
+          body.p.with fn (p) {
             p.text('hello')
             p.strong.text('world')
           }
@@ -142,23 +142,23 @@ bar
 
   t.test('Document.to_pretty_string with inline and block elements, and text') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.body.then fn (body) {
-        body.p.then fn (p) {
+      doc.body.with fn (body) {
+        body.p.with fn (p) {
           p.text('foo')
           p.strong.text('bar')
           p.text('baz')
         }
 
         body.text('bla')
-        body.ul.then fn (ul) {
+        body.ul.with fn (ul) {
           ul.strong.text('list start')
           ul.li.text('foo')
-          ul.li.then fn (li) {
+          ul.li.with fn (li) {
             li.text('bar')
             li.text(' bar')
             li.strong.text('inline')
 
-            li.ul.then fn (ul) {
+            li.ul.with fn (ul) {
               ul.text('before')
               ul.li.text('baz')
               ul.text('after')
@@ -210,7 +210,7 @@ bar
 
   t.test('Document.to_pretty_string with a hr followed by a heading') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.div.then fn (div) {
+      doc.div.with fn (div) {
         div.hr
         div.h1.text('hello')
       }

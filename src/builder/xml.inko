@@ -81,7 +81,7 @@ class pub Document {
   #     import builder.xml.Document
   #
   #     Document.with fn (doc) {
-  #       doc.element('person').then fn (person) {
+  #       doc.element('person').with fn (person) {
   #         person.element('name')
   #       }
   #     }
@@ -213,10 +213,10 @@ class pub Element {
   #
   #     import builder.xml.Element
   #
-  #     Element.new('person').then fn (person) {
+  #     Element.new('person').with fn (person) {
   #       person.element('name')
   #     }
-  fn pub mut then(func: fn (mut Element)) -> mut Element {
+  fn pub mut with(func: fn (mut Element)) -> mut Element {
     func.call(self)
     self
   }
@@ -275,7 +275,7 @@ class pub Generator {
   #
   #     let doc = Document.new
   #
-  #     doc.element('person').then fn (p) { p.element('name') }
+  #     doc.element('person').with fn (p) { p.element('name') }
   #
   #     Generator
   #       .new(indent: '')
@@ -287,7 +287,7 @@ class pub Generator {
   #
   #     let doc = Document.new
   #
-  #     doc.element('person').then fn (p) { p.element('name') }
+  #     doc.element('person').with fn (p) { p.element('name') }
   #
   #     Generator
   #       .new(indent: '  ')

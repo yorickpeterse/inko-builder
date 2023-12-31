@@ -4,11 +4,11 @@ import builder.xml.Document
 fn pub tests(t: mut Tests) {
   t.test('Document.to_string') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.element('person').attr('verified', 'true').then fn (p) {
+      doc.element('person').attr('verified', 'true').with fn (p) {
         p.element('name').text('Alice')
-        p.element('address').then fn (a) {
+        p.element('address').with fn (a) {
           a.element('city').text('Foo Town')
-          a.element('street').then fn (s) {
+          a.element('street').with fn (s) {
             s.text('Foo')
             s.element('strong').text('Street')
           }
@@ -35,11 +35,11 @@ fn pub tests(t: mut Tests) {
 
   t.test('Document.to_pretty_string') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.element('person').attr('verified', 'true').then fn (p) {
+      doc.element('person').attr('verified', 'true').with fn (p) {
         p.element('name').text('Alice')
-        p.element('address').then fn (a) {
+        p.element('address').with fn (a) {
           a.element('city').text('Foo Town')
-          a.element('street').then fn (s) {
+          a.element('street').with fn (s) {
             s.text('Foo')
             s.element('strong').text('Street')
           }
@@ -118,13 +118,13 @@ bar
 
   t.test('Document.to_pretty_string with multiple text nodes and an element') fn (t) {
     let doc = Document.with fn (doc) {
-      doc.element('first').then fn (el) {
+      doc.element('first').with fn (el) {
         el.element('a').text('foo')
         el.text('.')
         el.element('b').text('bar')
       }
 
-      doc.element('second').then fn (el) {
+      doc.element('second').with fn (el) {
         el.element('a').text('foo')
         el.element('b').text('bar')
       }
