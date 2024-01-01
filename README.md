@@ -12,7 +12,7 @@ Ruby.
 # Installation
 
 ```bash
-inko pkg add github.com/yorickpeterse/inko-builder 0.7.0
+inko pkg add github.com/yorickpeterse/inko-builder 0.8.0
 inko pkg sync
 ```
 
