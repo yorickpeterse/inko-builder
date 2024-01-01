@@ -66,11 +66,11 @@ fn escape?(input: String, quotes: Bool) -> Bool {
 # An XML document.
 class pub Document {
   # All top-level nodes in this document.
-  let pub @children: Array[Node]
+  let pub @nodes: Array[Node]
 
   # Returns a new empty document.
   fn pub static new -> Document {
-    Document { @children = [] }
+    Document { @nodes = [] }
   }
 
   # Creates a document and passes a mutable reference to the closure, returning
@@ -103,7 +103,7 @@ class pub Document {
     let el = Element.new(name)
     let ret = mut el
 
-    @children.push(Node.Element(el))
+    @nodes.push(Node.Element(el))
     ret
   }
 
@@ -159,7 +159,7 @@ class pub Element {
   let pub @attributes: Map[String, String]
 
   # The child nodes of this element.
-  let pub @children: Array[Node]
+  let pub @nodes: Array[Node]
 
   # A flag that signals this element is a self-closing element.
   let @self_closing: Bool
@@ -175,7 +175,7 @@ class pub Element {
     Element {
       @name = name,
       @attributes = Map.new,
-      @children = [],
+      @nodes = [],
       @self_closing = false,
     }
   }
@@ -191,7 +191,7 @@ class pub Element {
     let el = Element.new(name)
     let ret = mut el
 
-    @children.push(Node.Element(el))
+    @nodes.push(Node.Element(el))
     ret
   }
 
@@ -229,7 +229,7 @@ class pub Element {
   #
   #     Element.new('p').text('Hello!')
   fn pub mut text(text: String) -> mut Element {
-    @children.push(Node.Text(text))
+    @nodes.push(Node.Text(text))
     self
   }
 
@@ -304,7 +304,7 @@ class pub Generator {
 
     if indent? { @buffer.push("\n") }
 
-    document.children.iter.each fn (node) { node(node, depth: 0) }
+    document.nodes.iter.each fn (node) { node(node, depth: 0) }
     @buffer.into_string
   }
 
@@ -327,7 +327,7 @@ class pub Generator {
       @buffer.push('"')
     }
 
-    if element.self_closing? and element.children.empty? {
+    if element.self_closing? and element.nodes.empty? {
       @buffer.push(' />')
       return
     }
@@ -337,7 +337,7 @@ class pub Generator {
     # Whitespace inside nodes has meaning in XML, and as such we can only safely
     # indent child nodes if all of them are an element.
     let indent = if indent? {
-      element.children.iter.all? fn (node) {
+      element.nodes.iter.all? fn (node) {
         match node {
           case Element(_) -> true
           case _ -> false
@@ -348,9 +348,9 @@ class pub Generator {
     }
 
     if indent {
-      with_indent(element.children, depth)
+      with_indent(element.nodes, depth)
     } else {
-      without_indent(element.children, depth)
+      without_indent(element.nodes, depth)
     }
 
     @buffer.push('</')

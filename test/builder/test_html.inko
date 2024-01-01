@@ -312,7 +312,7 @@ bar
   t.test('Builder.text') fn (t) {
     let doc = Document.new
 
-    doc.p.text('a').attr('class', 'b')
+    doc.p.attr('class', 'b').text('a')
     t.equal(doc.to_string, '<!DOCTYPE html><p class="b">a</p>')
   }
 }

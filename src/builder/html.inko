@@ -8,7 +8,7 @@ import std.string.(StringBuffer, ToString)
 # doctype), but this can be disabled by setting `Document.fragment` to `true`.
 class pub Document {
   # All top-level nodes in this document.
-  let pub @children: Array[Node]
+  let pub @nodes: Array[Node]
 
   # If a doctype should be included when generating HTML.
   let @doctype: Bool
@@ -23,7 +23,7 @@ class pub Document {
   #
   #     doc.to_string # => '<!DOCTYPE html>'
   fn pub static new -> Document {
-    Document { @children = [], @doctype = true }
+    Document { @nodes = [], @doctype = true }
   }
 
   # Returns a new empty document that acts as a fragment.
@@ -40,7 +40,7 @@ class pub Document {
   #
   #     doc.to_string # => ''
   fn pub static fragment -> Document {
-    Document { @children = [], @doctype = false }
+    Document { @nodes = [], @doctype = false }
   }
 
   # Returns a `Document` that containes a top-level `<html>` tag.
@@ -100,8 +100,8 @@ impl ToString for Document {
 }
 
 impl Builder for Document {
-  fn pub mut add(element: Element) {
-    @children.push(Node.Element(element))
+  fn pub mut nodes_mut -> mut Array[Node] {
+    @nodes
   }
 }
 
@@ -123,7 +123,7 @@ class pub Element {
   let pub @attributes: Map[String, String]
 
   # The child nodes of this element.
-  let pub @children: Array[Node]
+  let pub @nodes: Array[Node]
 
   # If the element is a self-closing element.
   let pub @self_closing: Bool
@@ -142,7 +142,7 @@ class pub Element {
     Element {
       @name = name,
       @attributes = Map.new,
-      @children = [],
+      @nodes = [],
       @self_closing = false,
       @inline = false,
     }
@@ -171,18 +171,6 @@ class pub Element {
   #     }
   fn pub mut with(func: fn (mut Element)) -> mut Element {
     func.call(self)
-    self
-  }
-
-  # Adds a text node to this element.
-  #
-  # # Examples
-  #
-  #     import builder.html.Element
-  #
-  #     Element.new('p').text('Hello!')
-  fn pub mut text(text: String) -> mut Element {
-    @children.push(Node.Text(text))
     self
   }
 
@@ -219,15 +207,37 @@ class pub Element {
 }
 
 impl Builder for Element {
-  fn pub mut add(element: Element) {
-    @children.push(Node.Element(element))
+  fn pub mut nodes_mut -> mut Array[Node] {
+    @nodes
   }
 }
 
 # A type providing methods for building an HTML document.
 trait pub Builder {
+  # Returns a mutable reference to the nodes of `self`.
+  fn pub mut nodes_mut -> mut Array[Node]
+
   # Adds the child `Element` to `self`.
-  fn pub mut add(element: Element)
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('p').add(Element.new('span'))
+  fn pub mut add(element: Element) {
+    nodes_mut.push(Node.Element(element))
+  }
+
+  # Adds a text node to this element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Element
+  #
+  #     Element.new('p').text('Hello!')
+  fn pub mut text(text: String) {
+    nodes_mut.push(Node.Text(text))
+  }
 
   # Adds an element with the given name as a cild of `self`.
   fn pub mut element(name: String) -> mut Element {
@@ -855,7 +865,7 @@ class pub Generator {
       if indent? { @buffer.push("\n") }
     }
 
-    document.children.iter.each fn (node) { node(node, depth: 0) }
+    document.nodes.iter.each fn (node) { node(node, depth: 0) }
     @buffer.into_string
   }
 
@@ -878,7 +888,7 @@ class pub Generator {
       @buffer.push('"')
     }
 
-    if element.self_closing? and element.children.empty? {
+    if element.self_closing? and element.nodes.empty? {
       @buffer.push(' />')
       closing_newline(depth)
       return
@@ -887,7 +897,7 @@ class pub Generator {
     @buffer.push('>')
 
     let indent = if indent? {
-      element.children.iter.any? fn (node) {
+      element.nodes.iter.any? fn (node) {
         match node {
           case Element({ @inline = false }) -> true
           case _ -> false
@@ -898,9 +908,9 @@ class pub Generator {
     }
 
     if indent {
-      with_indent(element.children, depth)
+      with_indent(element.nodes, depth)
     } else {
-      without_indent(element.children, depth)
+      without_indent(element.nodes, depth)
     }
 
     @buffer.push('</')
