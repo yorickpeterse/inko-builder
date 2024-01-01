@@ -315,4 +315,13 @@ bar
     doc.p.attr('class', 'b').text('a')
     t.equal(doc.to_string, '<!DOCTYPE html><p class="b">a</p>')
   }
+
+  t.test('Builder.append') fn (t) {
+    let doc1 = Document.fragment
+    let doc2 = Document.fragment
+
+    doc1.p.text('test')
+    doc2.div.append(doc1)
+    t.equal(doc2.to_string, '<div><p>test</p></div>')
+  }
 }

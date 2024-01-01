@@ -228,6 +228,24 @@ trait pub Builder {
     nodes_mut.push(Node.Element(element))
   }
 
+  # Adds the nodes of the given `Document` to `self`.
+  #
+  # # Examples
+  #
+  #     import builder.html.(Document, Element)
+  #
+  #     let doc1 = Document.fragment
+  #     let doc2 = Document.fragment
+  #
+  #     doc1.p.text('test')
+  #     doc2.div.append(doc1)
+  #     doc2.to_string # => '<div><p>test</p></div>'
+  fn pub mut append(document: Document) {
+    match document {
+      case { @nodes = n } -> nodes_mut.append(n)
+    }
+  }
+
   # Adds a text node to this element.
   #
   # # Examples
