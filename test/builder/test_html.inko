@@ -2,19 +2,43 @@ import std.test.Tests
 import builder.html.Document
 
 fn pub tests(t: mut Tests) {
-  t.test('Document.to_string') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.html.with fn (html) {
-        html.head.with fn (head) {
-          head.title.text('Testing')
-          head.link.attr('href', 'foo')
-        }
+  t.test('Document.new') fn (t) {
+    let doc = Document.new
 
-        html.body.with fn (body) {
-          body.p.with fn (p) {
-            p.text('hello')
-            p.strong.text('world')
-          }
+    t.true(doc.doctype)
+  }
+
+  t.test('Document.fragment') fn (t) {
+    let doc = Document.fragment
+
+    t.false(doc.doctype)
+  }
+
+  t.test('Document.html') fn (t) {
+    let doc = Document.html('en') fn (h) {}
+
+    t.equal(doc.to_string, '<!DOCTYPE html><html lang="en"></html>')
+  }
+
+  t.test('Document.to_string with an empty document') fn (t) {
+    t.equal(Document.new.to_string, '<!DOCTYPE html>')
+  }
+
+  t.test('Document.to_string with an empty document fragment') fn (t) {
+    t.equal(Document.fragment.to_string, '')
+  }
+
+  t.test('Document.to_string') fn (t) {
+    let doc = Document.html('en') fn (html) {
+      html.head.with fn (head) {
+        head.title.text('Testing')
+        head.link.attr('href', 'foo')
+      }
+
+      html.body.with fn (body) {
+        body.p.with fn (p) {
+          p.text('hello')
+          p.strong.text('world')
         }
       }
     }
@@ -23,7 +47,7 @@ fn pub tests(t: mut Tests) {
       doc.to_string,
       '\
 <!DOCTYPE html>\
-<html>\
+<html lang="en">\
 <head>\
 <title>Testing</title>\
 <link href="foo" />\
@@ -37,18 +61,16 @@ fn pub tests(t: mut Tests) {
   }
 
   t.test('Document.to_pretty_string') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.html.with fn (html) {
-        html.head.with fn (head) {
-          head.title.text('Testing')
-          head.link.attr('href', 'foo')
-        }
+    let doc = Document.html('en') fn (html) {
+      html.head.with fn (head) {
+        head.title.text('Testing')
+        head.link.attr('href', 'foo')
+      }
 
-        html.body.with fn (body) {
-          body.p.with fn (p) {
-            p.text('hello')
-            p.strong.text('world')
-          }
+      html.body.with fn (body) {
+        body.p.with fn (p) {
+          p.text('hello')
+          p.strong.text('world')
         }
       }
     }
@@ -57,7 +79,7 @@ fn pub tests(t: mut Tests) {
       doc.to_pretty_string,
       '\
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>Testing</title>
     <link href="foo" />
@@ -71,10 +93,10 @@ fn pub tests(t: mut Tests) {
   }
 
   t.test('Document.to_pretty_string with two root elements') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.h1.text('foo')
-      doc.p.text('bar')
-    }
+    let doc = Document.new
+
+    doc.h1.text('foo')
+    doc.p.text('bar')
 
     t.equal(
       doc.to_pretty_string,
@@ -87,12 +109,11 @@ fn pub tests(t: mut Tests) {
   }
 
   t.test('Document.to_pretty_string with multiple text nodes') fn (t) {
-    let doc = Document.with fn (doc) {
-      let p = doc.p
+    let doc = Document.new
+    let p = doc.p
 
-      p.text('foo ')
-      p.text('bar')
-    }
+    p.text('foo ')
+    p.text('bar')
 
     t.equal(
       doc.to_pretty_string,
@@ -104,12 +125,11 @@ fn pub tests(t: mut Tests) {
   }
 
   t.test('Document.to_pretty_string with multiple text nodes with newlines') fn (t) {
-    let doc = Document.with fn (doc) {
-      let p = doc.p
+    let doc = Document.new
+    let p = doc.p
 
-      p.text("foo\n")
-      p.text("bar\n")
-    }
+    p.text("foo\n")
+    p.text("bar\n")
 
     t.equal(
       doc.to_pretty_string,
@@ -123,13 +143,12 @@ bar
   }
 
   t.test('Document.to_pretty_string with multiple text nodes and an element') fn (t) {
-    let doc = Document.with fn (doc) {
-      let p = doc.p
+    let doc = Document.new
+    let p = doc.p
 
-      p.text('foo ')
-      p.text('bar')
-      p.strong.text('test')
-    }
+    p.text('foo ')
+    p.text('bar')
+    p.strong.text('test')
 
     t.equal(
       doc.to_pretty_string,
@@ -141,28 +160,28 @@ bar
   }
 
   t.test('Document.to_pretty_string with inline and block elements, and text') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.body.with fn (body) {
-        body.p.with fn (p) {
-          p.text('foo')
-          p.strong.text('bar')
-          p.text('baz')
-        }
+    let doc = Document.new
 
-        body.text('bla')
-        body.ul.with fn (ul) {
-          ul.strong.text('list start')
-          ul.li.text('foo')
-          ul.li.with fn (li) {
-            li.text('bar')
-            li.text(' bar')
-            li.strong.text('inline')
+    doc.body.with fn (body) {
+      body.p.with fn (p) {
+        p.text('foo')
+        p.strong.text('bar')
+        p.text('baz')
+      }
 
-            li.ul.with fn (ul) {
-              ul.text('before')
-              ul.li.text('baz')
-              ul.text('after')
-            }
+      body.text('bla')
+      body.ul.with fn (ul) {
+        ul.strong.text('list start')
+        ul.li.text('foo')
+        ul.li.with fn (li) {
+          li.text('bar')
+          li.text(' bar')
+          li.strong.text('inline')
+
+          li.ul.with fn (ul) {
+            ul.text('before')
+            ul.li.text('baz')
+            ul.text('after')
           }
         }
       }
@@ -193,11 +212,10 @@ bar
   }
 
   t.test('Document.to_pretty_string with a hr followed by a heading, at the top') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.hr
-      doc.h1.text('hello')
-    }
+    let doc = Document.new
 
+    doc.hr
+    doc.h1.text('hello')
     t.equal(
       doc.to_pretty_string,
       '\
@@ -209,11 +227,11 @@ bar
   }
 
   t.test('Document.to_pretty_string with a hr followed by a heading') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.div.with fn (div) {
-        div.hr
-        div.h1.text('hello')
-      }
+    let doc = Document.new
+
+    doc.div.with fn (div) {
+      div.hr
+      div.h1.text('hello')
     }
 
     t.equal(
@@ -229,63 +247,72 @@ bar
   }
 
   t.test('Document.to_string with text to escape') fn (t) {
-    let doc = Document.with fn (doc) { doc.p.text('&><') }
+    let doc = Document.new
 
+    doc.p.text('&><')
     t.equal(doc.to_string, '<!DOCTYPE html><p>&amp;&gt;&lt;</p>')
   }
 
   t.test('Document.to_string with attribute values characters to escape') fn (t) {
-    let doc = Document.with fn (doc) { doc.p.attr('foo', 'a"b') }
+    let doc = Document.new
 
+    doc.p.attr('foo', 'a"b')
     t.equal(doc.to_string, '<!DOCTYPE html><p foo="a&quot;b"></p>')
   }
 
   t.test('Document.to_string without a doctype') fn (t) {
-    let doc = Document.with fn (doc) { doc.p.text('foo') }
+    let doc = Document.fragment
 
-    doc.fragment = true
+    doc.p.text('foo')
     t.equal(doc.to_string, '<p>foo</p>')
   }
 
   t.test('Builder.h1') fn (t) {
-    let doc = Document.with fn (doc) { doc.h1.text('foo') }
+    let doc = Document.new
 
+    doc.h1.text('foo')
     t.equal(doc.to_string, '<!DOCTYPE html><h1>foo</h1>')
   }
 
   t.test('Builder.h2') fn (t) {
-    let doc = Document.with fn (doc) { doc.h2.text('foo') }
+    let doc = Document.new
 
+    doc.h2.text('foo')
     t.equal(doc.to_string, '<!DOCTYPE html><h2>foo</h2>')
   }
 
   t.test('Builder.h3') fn (t) {
-    let doc = Document.with fn (doc) { doc.h3.text('foo') }
+    let doc = Document.new
 
+    doc.h3.text('foo')
     t.equal(doc.to_string, '<!DOCTYPE html><h3>foo</h3>')
   }
 
   t.test('Builder.h4') fn (t) {
-    let doc = Document.with fn (doc) { doc.h4.text('foo') }
+    let doc = Document.new
 
+    doc.h4.text('foo')
     t.equal(doc.to_string, '<!DOCTYPE html><h4>foo</h4>')
   }
 
   t.test('Builder.h5') fn (t) {
-    let doc = Document.with fn (doc) { doc.h5.text('foo') }
+    let doc = Document.new
 
+    doc.h5.text('foo')
     t.equal(doc.to_string, '<!DOCTYPE html><h5>foo</h5>')
   }
 
   t.test('Builder.h6') fn (t) {
-    let doc = Document.with fn (doc) { doc.h6.text('foo') }
+    let doc = Document.new
 
+    doc.h6.text('foo')
     t.equal(doc.to_string, '<!DOCTYPE html><h6>foo</h6>')
   }
 
   t.test('Builder.text') fn (t) {
-    let doc = Document.with fn (doc) { doc.p.text('a').attr('class', 'b') }
+    let doc = Document.new
 
+    doc.p.text('a').attr('class', 'b')
     t.equal(doc.to_string, '<!DOCTYPE html><p class="b">a</p>')
   }
 }

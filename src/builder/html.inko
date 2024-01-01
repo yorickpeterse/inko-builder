@@ -10,33 +10,58 @@ class pub Document {
   # All top-level nodes in this document.
   let pub @children: Array[Node]
 
-  # If the document is to be treated as a document, or just a fragment.
-  #
-  # Setting this field to `true` allows you to bundle nodes together and
-  # serialize them to a `String`, but without including a doctype.
-  let pub @fragment: Bool
+  # If a doctype should be included when generating HTML.
+  let @doctype: Bool
 
   # Returns a new empty document.
-  fn pub static new -> Document {
-    Document { @children = [], @fragment = false }
-  }
-
-  # Creates a document and passes a mutable reference to the closure, returning
-  # the document afterwards.
   #
   # # Examples
   #
   #     import builder.html.Document
   #
-  #     Document.with fn (doc) {
-  #       doc.head.with fn (head) {
-  #         head.title.text('Hello')
-  #       }
+  #     let doc = Document.new
+  #
+  #     doc.to_string # => '<!DOCTYPE html>'
+  fn pub static new -> Document {
+    Document { @children = [], @doctype = true }
+  }
+
+  # Returns a new empty document that acts as a fragment.
+  #
+  # A fragment is an HTML document without a doctype, making it useful for
+  # generating chunks of HTML meant to be included in other chunks of HTML (e.g.
+  # when rendering Markdown as part of a larger document).
+  #
+  # # Examples
+  #
+  #     import builder.html.Document
+  #
+  #     let doc = Document.fragment
+  #
+  #     doc.to_string # => ''
+  fn pub static fragment -> Document {
+    Document { @children = [], @doctype = false }
+  }
+
+  # Returns a `Document` that containes a top-level `<html>` tag.
+  #
+  # The `lang` argument specifies the value of the `lang` attribute of the
+  # `<html>` element.
+  #
+  # The `func` argument is called with a mutable reference to the top-level
+  # `<html>` element.
+  #
+  # # Examples
+  #
+  #     import builder.html.Document
+  #
+  #     Document.html('en') fn (html) {
+  #       html.head.title.text('Hello')
   #     }
-  fn pub static with(func: fn (mut Document)) -> Document {
+  fn pub static html(lang: String, func: fn (mut Element)) -> Document {
     let doc = new
 
-    func.call(doc)
+    doc.element('html').attr('lang', lang).with(func)
     doc
   }
 
@@ -75,8 +100,8 @@ impl ToString for Document {
 }
 
 impl Builder for Document {
-  fn pub mut add_child(node: Node) {
-    @children.push(node)
+  fn pub mut add(element: Element) {
+    @children.push(Node.Element(element))
   }
 }
 
@@ -194,22 +219,22 @@ class pub Element {
 }
 
 impl Builder for Element {
-  fn pub mut add_child(node: Node) {
-    @children.push(node)
+  fn pub mut add(element: Element) {
+    @children.push(Node.Element(element))
   }
 }
 
 # A type providing methods for building an HTML document.
 trait pub Builder {
-  # Adds the child node to `self`.
-  fn pub mut add_child(node: Node)
+  # Adds the child `Element` to `self`.
+  fn pub mut add(element: Element)
 
   # Adds an element with the given name as a cild of `self`.
   fn pub mut element(name: String) -> mut Element {
     let el = Element.new(name)
     let ret = mut el
 
-    add_child(Node.Element(el))
+    add(el)
     ret
   }
 
@@ -451,11 +476,6 @@ trait pub Builder {
   # Adds a `<hr>` element as a child element.
   fn pub mut hr -> mut Element {
     element('hr').self_closing
-  }
-
-  # Adds a `<html>` element as a child element.
-  fn pub mut html -> mut Element {
-    element('html')
   }
 
   # Adds a `<i>` element as a child element.
@@ -829,7 +849,7 @@ class pub Generator {
   fn pub move generate(document: ref Document) -> String {
     # There's not really a reason to use any other doctype for HTML5, so we just
     # don't bother supporting anything else.
-    if document.fragment.false? {
+    if document.doctype {
       @buffer.push('<!DOCTYPE html>')
 
       if indent? { @buffer.push("\n") }

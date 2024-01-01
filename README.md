@@ -28,7 +28,7 @@ class async Main {
   fn async main {
     let out = STDOUT.new
     let doc = Document.with fn (doc) {
-      doc.element('person').then fn (person) {
+      doc.element('person').with fn (person) {
         person.element('name').text('Alice')
         person.element('city').text('Foo Town')
       }
@@ -58,15 +58,13 @@ import std.stdio.STDOUT
 class async Main {
   fn async main {
     let out = STDOUT.new
-    let doc = Document.with fn (doc) {
-      doc.html.then fn (html) {
-        html.head.then fn (head) {
-          head.title.text('My website')
-        }
+    let doc = Document.html('en') fn (html) {
+      html.head.with fn (head) {
+        head.title.text('My website')
+      }
 
-        html.body.then fn (body) {
-          body.p.text('Hello!')
-        }
+      html.body.with fn (body) {
+        body.p.text('Hello!')
       }
     }
 
@@ -79,7 +77,7 @@ This produces the following HTML:
 
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>My website</title>
   </head>
