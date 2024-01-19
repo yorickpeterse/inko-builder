@@ -204,6 +204,12 @@ class pub Element {
   fn pub self_closing? -> Bool {
     @self_closing
   }
+
+  # Replaces the nodes of `self` with a new empty array, returning the old
+  # array of nodes.
+  fn pub mut take_nodes -> Array[Node] {
+    @nodes := []
+  }
 }
 
 impl Builder for Element {

@@ -1,5 +1,5 @@
 import std.test.Tests
-import builder.html.Document
+import builder.html.(Document, Element)
 
 fn pub tests(t: mut Tests) {
   t.test('Document.new') fn (t) {
@@ -323,5 +323,14 @@ bar
     doc1.p.text('test')
     doc2.div.append(doc1)
     t.equal(doc2.to_string, '<div><p>test</p></div>')
+  }
+
+  t.test('Element.take_nodes') fn (t) {
+    let div = Element.new('div')
+
+    div.p.text('hello')
+
+    t.equal(div.take_nodes.size, 1)
+    t.true(div.nodes.empty?)
   }
 }
