@@ -253,6 +253,28 @@ bar
     t.equal(doc.to_string, '<!DOCTYPE html><p>&amp;&gt;&lt;</p>')
   }
 
+  t.test('Document.to_string with a <style> element containing HTML entities') fn (t) {
+    let doc = Document.new
+
+    doc.style.text('a > b')
+    doc.div.style.text('a > b')
+    t.equal(
+      doc.to_string,
+      '<!DOCTYPE html><style>a > b</style><div><style>a > b</style></div>'
+    )
+  }
+
+  t.test('Document.to_string with a <script> element containing HTML entities') fn (t) {
+    let doc = Document.new
+
+    doc.script.text('a > b')
+    doc.div.script.text('a > b')
+    t.equal(
+      doc.to_string,
+      '<!DOCTYPE html><script>a > b</script><div><script>a > b</script></div>'
+    )
+  }
+
   t.test('Document.to_string with attribute values characters to escape') fn (t) {
     let doc = Document.new
 

@@ -210,6 +210,14 @@ class pub Element {
   fn pub mut take_nodes -> Array[Node] {
     @nodes := []
   }
+
+  # Returns `true` if HTML entities in text nodes must be escaped.
+  fn escape_entities? -> Bool {
+    match @name {
+      case 'script' or 'style' -> false
+      case _ -> true
+    }
+  }
 }
 
 impl Builder for Element {
@@ -889,14 +897,15 @@ class pub Generator {
       if indent? { @buffer.push("\n") }
     }
 
-    document.nodes.iter.each fn (node) { node(node, depth: 0) }
+    document.nodes.iter.each fn (node) { node(node, depth: 0, escape: true) }
     @buffer.into_string
   }
 
-  fn mut node(node: ref Node, depth: Int) {
+  fn mut node(node: ref Node, depth: Int, escape: Bool) {
     match node {
       case Element(el) -> element(el, depth)
-      case Text(v) -> @buffer.push(escape(v, quotes: false))
+      case Text(v) if escape -> @buffer.push(escape(v, quotes: false))
+      case Text(v) -> @buffer.push(v)
     }
   }
 
@@ -931,10 +940,12 @@ class pub Generator {
       false
     }
 
+    let escape = element.escape_entities?
+
     if indent {
-      with_indent(element.nodes, depth)
+      with_indent(element.nodes, depth, escape)
     } else {
-      without_indent(element.nodes, depth)
+      without_indent(element.nodes, depth, escape)
     }
 
     @buffer.push('</')
@@ -943,11 +954,13 @@ class pub Generator {
     closing_newline(depth)
   }
 
-  fn mut without_indent(nodes: ref Array[Node], depth: Int) {
-    nodes.iter.each_with_index fn (index, child) { node(child, depth + 1) }
+  fn mut without_indent(nodes: ref Array[Node], depth: Int, escape: Bool) {
+    nodes.iter.each_with_index fn (index, child) {
+      node(child, depth + 1, escape)
+    }
   }
 
-  fn mut with_indent(nodes: ref Array[Node], depth: Int) {
+  fn mut with_indent(nodes: ref Array[Node], depth: Int, escape: Bool) {
     @buffer.push("\n")
 
     nodes.iter.each_with_index fn (index, child) {
@@ -974,7 +987,7 @@ class pub Generator {
 
       if add_indent { indent(depth + 1) }
 
-      node(child, depth + 1)
+      node(child, depth + 1, escape)
 
       if add_nl { @buffer.push("\n") }
     }
