@@ -1,57 +1,46 @@
-import std.test.Tests
-import builder.xml.Document
+import builder.xml (Document)
+import std.test (Tests)
 
 fn pub tests(t: mut Tests) {
-  t.test('Document.to_string') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.element('person').attr('verified', 'true').with fn (p) {
+  t.test('Document.to_string', fn (t) {
+    let doc = Document.with(fn (doc) {
+      doc.element('person').attr('verified', 'true').with(fn (p) {
         p.element('name').text('Alice')
-        p.element('address').with fn (a) {
+        p.element('address').with(fn (a) {
           a.element('city').text('Foo Town')
-          a.element('street').with fn (s) {
+          a.element('street').with(fn (s) {
             s.text('Foo')
             s.element('strong').text('Street')
-          }
+          })
           a.element('bla').self_closing
-        }
-      }
-    }
+        })
+      })
+    })
 
     t.equal(
       doc.to_string,
-      '\
-<?xml version="1.0" encoding="UTF-8" ?>\
-<person verified="true">\
-<name>Alice</name>\
-<address>\
-<city>Foo Town</city>\
-<street>Foo<strong>Street</strong></street>\
-<bla />\
-</address>\
-</person>\
-      '
+      '<?xml version="1.0" encoding="UTF-8" ?><person verified="true"><name>Alice</name><address><city>Foo Town</city><street>Foo<strong>Street</strong></street><bla /></address></person>',
     )
-  }
+  })
 
-  t.test('Document.to_pretty_string') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.element('person').attr('verified', 'true').with fn (p) {
+  t.test('Document.to_pretty_string', fn (t) {
+    let doc = Document.with(fn (doc) {
+      doc.element('person').attr('verified', 'true').with(fn (p) {
         p.element('name').text('Alice')
-        p.element('address').with fn (a) {
+        p.element('address').with(fn (a) {
           a.element('city').text('Foo Town')
-          a.element('street').with fn (s) {
+          a.element('street').with(fn (s) {
             s.text('Foo')
             s.element('strong').text('Street')
-          }
+          })
           a.element('bla').self_closing
-        }
-      }
-    }
+        })
+      })
+    })
 
     t.equal(
       doc.to_pretty_string,
-      '\
-<?xml version="1.0" encoding="UTF-8" ?>
+      '<?xml version="1.0" encoding="UTF-8" ?>
 <person verified="true">
   <name>Alice</name>
   <address>
@@ -60,114 +49,122 @@ fn pub tests(t: mut Tests) {
     <bla />
   </address>
 </person>
-'
+',
     )
-  }
+  })
 
-  t.test('Document.to_pretty_string with two root elements') fn (t) {
-    let doc = Document.with fn (doc) {
+  t.test('Document.to_pretty_string with two root elements', fn (t) {
+    let doc = Document.with(fn (doc) {
       doc.element('a').text('foo')
       doc.element('b').text('bar')
-    }
+    })
 
     t.equal(
       doc.to_pretty_string,
-      '\
-<?xml version="1.0" encoding="UTF-8" ?>
+      '<?xml version="1.0" encoding="UTF-8" ?>
 <a>foo</a>
 <b>bar</b>
-'
+',
     )
-  }
+  })
 
-  t.test('Document.to_pretty_string with multiple text nodes') fn (t) {
-    let doc = Document.with fn (doc) {
+  t.test('Document.to_pretty_string with multiple text nodes', fn (t) {
+    let doc = Document.with(fn (doc) {
       let p = doc.element('p')
 
       p.text('foo ')
       p.text('bar')
-    }
+    })
 
     t.equal(
       doc.to_pretty_string,
-      '\
-<?xml version="1.0" encoding="UTF-8" ?>
+      '<?xml version="1.0" encoding="UTF-8" ?>
 <p>foo bar</p>
-'
+',
     )
-  }
+  })
 
-  t.test('Document.to_pretty_string with multiple text nodes with newlines') fn (t) {
-    let doc = Document.with fn (doc) {
-      let p = doc.element('p')
+  t.test(
+    'Document.to_pretty_string with multiple text nodes with newlines',
+    fn (t) {
+      let doc = Document.with(fn (doc) {
+        let p = doc.element('p')
 
-      p.text("foo\n")
-      p.text("bar\n")
-    }
+        p.text('foo\n')
+        p.text('bar\n')
+      })
 
-    t.equal(
-      doc.to_pretty_string,
-      '\
-<?xml version="1.0" encoding="UTF-8" ?>
+      t.equal(
+        doc.to_pretty_string,
+        '<?xml version="1.0" encoding="UTF-8" ?>
 <p>foo
 bar
 </p>
-'
-    )
-  }
+',
+      )
+    },
+  )
 
-  t.test('Document.to_pretty_string with multiple text nodes and an element') fn (t) {
-    let doc = Document.with fn (doc) {
-      doc.element('first').with fn (el) {
-        el.element('a').text('foo')
-        el.text('.')
-        el.element('b').text('bar')
-      }
+  t.test(
+    'Document.to_pretty_string with multiple text nodes and an element',
+    fn (t) {
+      let doc = Document.with(fn (doc) {
+        doc.element('first').with(fn (el) {
+          el.element('a').text('foo')
+          el.text('.')
+          el.element('b').text('bar')
+        })
 
-      doc.element('second').with fn (el) {
-        el.element('a').text('foo')
-        el.element('b').text('bar')
-      }
-    }
+        doc.element('second').with(fn (el) {
+          el.element('a').text('foo')
+          el.element('b').text('bar')
+        })
+      })
 
-    t.equal(
-      doc.to_pretty_string,
-      '\
-<?xml version="1.0" encoding="UTF-8" ?>
+      t.equal(
+        doc.to_pretty_string,
+        '<?xml version="1.0" encoding="UTF-8" ?>
 <first><a>foo</a>.<b>bar</b></first>
 <second>
   <a>foo</a>
   <b>bar</b>
 </second>
-'
-    )
-  }
+',
+      )
+    },
+  )
 
-  t.test('Document.to_string with text to escape') fn (t) {
-    let doc = Document.with fn (doc) { doc.element('name').text('&><') }
-
-    t.equal(
-      doc.to_string,
-      '<?xml version="1.0" encoding="UTF-8" ?><name>&amp;&gt;&lt;</name>'
-    )
-  }
-
-  t.test('Document.to_string with attribute values characters to escape') fn (t) {
-    let doc = Document.with fn (doc) { doc.element('name').attr('foo', 'a"b') }
+  t.test('Document.to_string with text to escape', fn (t) {
+    let doc = Document.with(fn (doc) { doc.element('name').text('&><') })
 
     t.equal(
       doc.to_string,
-      '<?xml version="1.0" encoding="UTF-8" ?><name foo="a&quot;b"></name>'
+      '<?xml version="1.0" encoding="UTF-8" ?><name>&amp;&gt;&lt;</name>',
     )
-  }
+  })
 
-  t.test('Builder.text') fn (t) {
-    let doc =
-      Document.with fn (doc) { doc.element('p').text('a').attr('class', 'b') }
+  t.test(
+    'Document.to_string with attribute values characters to escape',
+    fn (t) {
+      let doc = Document.with(fn (doc) {
+        doc.element('name').attr('foo', 'a"b')
+      })
+
+      t.equal(
+        doc.to_string,
+        '<?xml version="1.0" encoding="UTF-8" ?><name foo="a&quot;b"></name>',
+      )
+    },
+  )
+
+  t.test('Builder.text', fn (t) {
+    let doc = Document.with(fn (doc) {
+      doc.element('p').text('a').attr('class', 'b')
+    })
 
     t.equal(
       doc.to_string,
-      '<?xml version="1.0" encoding="UTF-8" ?><p class="b">a</p>'
+      '<?xml version="1.0" encoding="UTF-8" ?><p class="b">a</p>',
     )
-  }
+  })
 }

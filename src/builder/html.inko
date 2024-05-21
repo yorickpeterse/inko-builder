@@ -1,6 +1,6 @@
 # Generating of HTML5 documents and elements.
-import builder.xml.(escape)
-import std.string.(StringBuffer, ToString)
+import builder.xml (escape)
+import std.string (StringBuffer, ToString)
 
 # A container for HTML nodes
 #
@@ -23,7 +23,7 @@ class pub Document {
   #
   #     doc.to_string # => '<!DOCTYPE html>'
   fn pub static new -> Document {
-    Document { @nodes = [], @doctype = true }
+    Document(nodes: [], doctype: true)
   }
 
   # Returns a new empty document that acts as a fragment.
@@ -40,7 +40,7 @@ class pub Document {
   #
   #     doc.to_string # => ''
   fn pub static fragment -> Document {
-    Document { @nodes = [], @doctype = false }
+    Document(nodes: [], doctype: false)
   }
 
   # Returns a `Document` that containes a top-level `<html>` tag.
@@ -139,13 +139,13 @@ class pub Element {
   #
   #     Element.new('p')
   fn pub static new(name: String) -> Element {
-    Element {
-      @name = name,
-      @attributes = Map.new,
-      @nodes = [],
-      @self_closing = false,
-      @inline = false,
-    }
+    Element(
+      name: name,
+      attributes: Map.new,
+      nodes: [],
+      self_closing: false,
+      inline: false,
+    )
   }
 
   # Adds an attribute to this element.
@@ -884,7 +884,7 @@ class pub Generator {
   #       .new(indent: '  ')
   #       .generate(doc) # => "<body>\n  <p>\n    hello\n  </p>\n</body>"
   fn pub static new(indent: String) -> Generator {
-    Generator { @buffer = StringBuffer.new, @indent = indent }
+    Generator(buffer: StringBuffer.new, indent: indent)
   }
 
   # Returns a `String` containing the HTML representation of the given document.
@@ -894,10 +894,10 @@ class pub Generator {
     if document.doctype {
       @buffer.push('<!DOCTYPE html>')
 
-      if indent? { @buffer.push("\n") }
+      if indent? { @buffer.push('\n') }
     }
 
-    document.nodes.iter.each fn (node) { node(node, depth: 0, escape: true) }
+    document.nodes.iter.each(fn (node) { node(node, depth: 0, escape: true) })
     @buffer.into_string
   }
 
@@ -913,13 +913,13 @@ class pub Generator {
     @buffer.push('<')
     @buffer.push(element.name)
 
-    element.attributes.iter.each fn (pair) {
+    element.attributes.iter.each(fn (pair) {
       @buffer.push(' ')
       @buffer.push(pair.key)
       @buffer.push('="')
       @buffer.push(escape(pair.value, quotes: true))
       @buffer.push('"')
-    }
+    })
 
     if element.self_closing? and element.nodes.empty? {
       @buffer.push(' />')
@@ -930,12 +930,12 @@ class pub Generator {
     @buffer.push('>')
 
     let indent = if indent? {
-      element.nodes.iter.any? fn (node) {
+      element.nodes.iter.any?(fn (node) {
         match node {
           case Element({ @inline = false }) -> true
           case _ -> false
         }
-      }
+      })
     } else {
       false
     }
@@ -955,32 +955,38 @@ class pub Generator {
   }
 
   fn mut without_indent(nodes: ref Array[Node], depth: Int, escape: Bool) {
-    nodes.iter.each_with_index fn (index, child) {
+    nodes.iter.each_with_index(fn (index, child) {
       node(child, depth + 1, escape)
-    }
+    })
   }
 
   fn mut with_indent(nodes: ref Array[Node], depth: Int, escape: Bool) {
-    @buffer.push("\n")
+    @buffer.push('\n')
 
-    nodes.iter.each_with_index fn (index, child) {
+    nodes.iter.each_with_index(fn (index, child) {
       let add_indent = match child {
         case Element({ @inline = true }) -> index == 0
-        case Text(_) -> match nodes.opt(index - 1) {
-          case Some(Text(_) or Element({ @inline = true })) -> false
-          case _ -> true
+        case Text(_) -> {
+          match nodes.opt(index - 1) {
+            case Some(Text(_) or Element({ @inline = true })) -> false
+            case _ -> true
+          }
         }
         case _ -> true
       }
 
       let add_nl = match child {
-        case Element({ @inline = true }) -> match nodes.opt(index + 1) {
-          case Some(Element({ @inline = false })) -> true
-          case _ -> false
+        case Element({ @inline = true }) -> {
+          match nodes.opt(index + 1) {
+            case Some(Element({ @inline = false })) -> true
+            case _ -> false
+          }
         }
-        case Text(v) -> match nodes.opt(index + 1) {
-          case Some(Text(_) or Element({ @inline = true })) -> false
-          case _ -> v.ends_with?("\n").false?
+        case Text(v) -> {
+          match nodes.opt(index + 1) {
+            case Some(Text(_) or Element({ @inline = true })) -> false
+            case _ -> v.ends_with?('\n').false?
+          }
         }
         case _ -> true
       }
@@ -989,18 +995,18 @@ class pub Generator {
 
       node(child, depth + 1, escape)
 
-      if add_nl { @buffer.push("\n") }
-    }
+      if add_nl { @buffer.push('\n') }
+    })
 
     indent(depth)
   }
 
   fn mut indent(depth: Int) {
-    depth.times fn (_) { @buffer.push(@indent) }
+    depth.times(fn (_) { @buffer.push(@indent) })
   }
 
   fn mut closing_newline(depth: Int) {
-    if depth == 0 and indent? { @buffer.push("\n") }
+    if depth == 0 and indent? { @buffer.push('\n') }
   }
 
   fn indent? -> Bool {

@@ -1,5 +1,5 @@
 # Generating of XML documents and elements.
-import std.string.(StringBuffer, ToString)
+import std.string (StringBuffer, ToString)
 
 let QUOTE = 34
 let AMP = 38
@@ -70,7 +70,7 @@ class pub Document {
 
   # Returns a new empty document.
   fn pub static new -> Document {
-    Document { @nodes = [] }
+    Document([])
   }
 
   # Creates a document and passes a mutable reference to the closure, returning
@@ -172,12 +172,7 @@ class pub Element {
   #
   #     Element.new('person')
   fn pub static new(name: String) -> Element {
-    Element {
-      @name = name,
-      @attributes = Map.new,
-      @nodes = [],
-      @self_closing = false,
-    }
+    Element(name: name, attributes: Map.new, nodes: [], self_closing: false)
   }
 
   # Adds a child element with the given name.
@@ -293,7 +288,7 @@ class pub Generator {
   #       .new(indent: '  ')
   #       .generate(doc) # => "<person>\n  <name></name>\n</person>"
   fn pub static new(indent: String) -> Generator {
-    Generator { @buffer = StringBuffer.new, @indent = indent }
+    Generator(buffer: StringBuffer.new, indent: indent)
   }
 
   # Returns a `String` containing the XML representation of the given document.
@@ -302,9 +297,9 @@ class pub Generator {
     # UTF-8.
     @buffer.push('<?xml version="1.0" encoding="UTF-8" ?>')
 
-    if indent? { @buffer.push("\n") }
+    if indent? { @buffer.push('\n') }
 
-    document.nodes.iter.each fn (node) { node(node, depth: 0) }
+    document.nodes.iter.each(fn (node) { node(node, depth: 0) })
     @buffer.into_string
   }
 
@@ -319,13 +314,13 @@ class pub Generator {
     @buffer.push('<')
     @buffer.push(element.name)
 
-    element.attributes.iter.each fn (pair) {
+    element.attributes.iter.each(fn (pair) {
       @buffer.push(' ')
       @buffer.push(pair.key)
       @buffer.push('="')
       @buffer.push(escape(pair.value, quotes: true))
       @buffer.push('"')
-    }
+    })
 
     if element.self_closing? and element.nodes.empty? {
       @buffer.push(' />')
@@ -337,12 +332,12 @@ class pub Generator {
     # Whitespace inside nodes has meaning in XML, and as such we can only safely
     # indent child nodes if all of them are an element.
     let indent = if indent? {
-      element.nodes.iter.all? fn (node) {
+      element.nodes.iter.all?(fn (node) {
         match node {
           case Element(_) -> true
           case _ -> false
         }
-      }
+      })
     } else {
       false
     }
@@ -357,30 +352,34 @@ class pub Generator {
     @buffer.push(element.name)
     @buffer.push('>')
 
-    if depth == 0 and indent? { @buffer.push("\n") }
+    if depth == 0 and indent? { @buffer.push('\n') }
   }
 
   fn mut without_indent(nodes: ref Array[Node], depth: Int) {
-    nodes.iter.each_with_index fn (index, child) { node(child, depth + 1) }
+    nodes.iter.each_with_index(fn (index, child) { node(child, depth + 1) })
   }
 
   fn mut with_indent(nodes: ref Array[Node], depth: Int) {
-    @buffer.push("\n")
+    @buffer.push('\n')
 
-    nodes.iter.each_with_index fn (index, child) {
+    nodes.iter.each_with_index(fn (index, child) {
       let add_indent = match child {
         case Element(_) -> true
-        case Text(_) -> match nodes.opt(index - 1) {
-          case Some(Text(_)) -> false
-          case _ -> true
+        case Text(_) -> {
+          match nodes.opt(index - 1) {
+            case Some(Text(_)) -> false
+            case _ -> true
+          }
         }
       }
 
       let add_nl = match child {
         case Element(_) -> true
-        case Text(v) -> match nodes.opt(index + 1) {
-          case Some(Text(_)) -> false
-          case _ -> v.ends_with?("\n").false?
+        case Text(v) -> {
+          match nodes.opt(index + 1) {
+            case Some(Text(_)) -> false
+            case _ -> v.ends_with?('\n').false?
+          }
         }
       }
 
@@ -388,14 +387,14 @@ class pub Generator {
 
       node(child, depth + 1)
 
-      if add_nl { @buffer.push("\n") }
-    }
+      if add_nl { @buffer.push('\n') }
+    })
 
     indent(depth)
   }
 
   fn mut indent(depth: Int) {
-    depth.times fn (_) { @buffer.push(@indent) }
+    depth.times(fn (_) { @buffer.push(@indent) })
   }
 
   fn indent? -> Bool {
