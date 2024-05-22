@@ -21,18 +21,18 @@ inko pkg sync
 Generating a simple XML document:
 
 ```inko
-import builder.xml.Document
-import std.stdio.STDOUT
+import builder.xml (Document)
+import std.stdio (STDOUT)
 
 class async Main {
   fn async main {
     let out = STDOUT.new
-    let doc = Document.with fn (doc) {
-      doc.element('person').with fn (person) {
+    let doc = Document.with(fn (doc) {
+      doc.element('person').with(fn (person) {
         person.element('name').text('Alice')
         person.element('city').text('Foo Town')
-      }
-    }
+      })
+    })
 
     out.print(doc.to_pretty_string)
   }
@@ -52,21 +52,17 @@ This produces the following XML:
 Generating a simple HTML document:
 
 ```inko
-import builder.html.Document
-import std.stdio.STDOUT
+import builder.html (Document)
+import std.stdio (STDOUT)
 
 class async Main {
   fn async main {
     let out = STDOUT.new
-    let doc = Document.html('en') fn (html) {
-      html.head.with fn (head) {
-        head.title.text('My website')
-      }
+    let doc = Document.html('en', fn (html) {
+      html.head.with(fn (head) { head.title.text('My website') })
 
-      html.body.with fn (body) {
-        body.p.text('Hello!')
-      }
-    }
+      html.body.with(fn (body) { body.p.text('Hello!') })
+    })
 
     out.print(doc.to_pretty_string)
   }
