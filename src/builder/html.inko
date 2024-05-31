@@ -55,9 +55,9 @@ class pub Document {
   #
   #     import builder.html.Document
   #
-  #     Document.html('en') fn (html) {
+  #     Document.html('en', fn (html) {
   #       html.head.title.text('Hello')
-  #     }
+  #     })
   fn pub static html(lang: String, func: fn (mut Element)) -> Document {
     let doc = new
 
