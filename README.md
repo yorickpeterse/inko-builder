@@ -84,7 +84,7 @@ This produces the following HTML:
 ```
 
 For more information, refer to the [API
-documentation](https://yorickpeterse.github.io/inko-markdown/).
+documentation](https://yorickpeterse.github.io/inko-builder/).
 
 # License
 
