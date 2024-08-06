@@ -78,13 +78,15 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.xml.Document
+  # ```inko
+  # import builder.xml.Document
   #
-  #     Document.with fn (doc) {
-  #       doc.element('person').with fn (person) {
-  #         person.element('name')
-  #       }
-  #     }
+  # Document.with fn (doc) {
+  #   doc.element('person').with fn (person) {
+  #     person.element('name')
+  #   }
+  # }
+  # ```
   fn pub static with(func: fn (mut Document)) -> Document {
     let doc = new
 
@@ -96,9 +98,11 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.xml.Document
+  # ```inko
+  # import builder.xml.Document
   #
-  #     Document.new.element('foo')
+  # Document.new.element('foo')
+  # ```
   fn pub mut element(name: String) -> mut Element {
     let el = Element.new(name)
     let ret = mut el
@@ -114,12 +118,14 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.xml.Document
+  # ```inko
+  # import builder.xml.Document
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.element('person')
-  #     doc.to_pretty_string # => "<person>\n</person>"
+  # doc.element('person')
+  # doc.to_pretty_string # => "<person>\n</person>"
+  # ```
   fn pub to_pretty_string -> String {
     Generator.new(indent: '  ').generate(self)
   }
@@ -130,12 +136,14 @@ impl ToString for Document {
   #
   # # Examples
   #
-  #     import builder.xml.Document
+  # ```inko
+  # import builder.xml.Document
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.element('person')
-  #     doc.to_string # => '<person></person>'
+  # doc.element('person')
+  # doc.to_string # => '<person></person>'
+  # ```
   fn pub to_string -> String {
     Generator.new(indent: '').generate(self)
   }
@@ -168,9 +176,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     Element.new('person')
+  # Element.new('person')
+  # ```
   fn pub static new(name: String) -> Element {
     Element(name: name, attributes: Map.new, nodes: [], self_closing: false)
   }
@@ -179,9 +189,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     Element.new('person').element('name')
+  # Element.new('person').element('name')
+  # ```
   fn pub mut element(name: String) -> mut Element {
     let el = Element.new(name)
     let ret = mut el
@@ -194,9 +206,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     Element.new('user').attr('verified', 'true')
+  # Element.new('user').attr('verified', 'true')
+  # ```
   fn pub mut attr(name: String, value: String) -> mut Element {
     @attributes.set(name, value)
     self
@@ -206,11 +220,13 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     Element.new('person').with fn (person) {
-  #       person.element('name')
-  #     }
+  # Element.new('person').with fn (person) {
+  #   person.element('name')
+  # }
+  # ```
   fn pub mut with(func: fn (mut Element)) -> mut Element {
     func.call(self)
     self
@@ -220,9 +236,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     Element.new('p').text('Hello!')
+  # Element.new('p').text('Hello!')
+  # ```
   fn pub mut text(text: String) -> mut Element {
     @nodes.push(Node.Text(text))
     self
@@ -232,9 +250,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     Element.new('link').self_closing
+  # Element.new('link').self_closing
+  # ```
   fn pub mut self_closing -> mut Element {
     @self_closing = true
     self
@@ -244,12 +264,14 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.xml.Element
+  # ```inko
+  # import builder.xml.Element
   #
-  #     let el = Element.new('link')
+  # let el = Element.new('link')
   #
-  #     el.self_closing
-  #     el.self_closing? # => true
+  # el.self_closing
+  # el.self_closing? # => true
+  # ```
   fn pub self_closing? -> Bool {
     @self_closing
   }
@@ -266,27 +288,31 @@ class pub Generator {
   #
   # Generating XML without any indentation:
   #
-  #     import builder.xml.(Document, Generator)
+  # ```inko
+  # import builder.xml.(Document, Generator)
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.element('person').with fn (p) { p.element('name') }
+  # doc.element('person').with fn (p) { p.element('name') }
   #
-  #     Generator
-  #       .new(indent: '')
-  #       .generate(doc) # => '<person><name></name></person>'
+  # Generator
+  #   .new(indent: '')
+  #   .generate(doc) # => '<person><name></name></person>'
+  # ```
   #
   # Using two spaces for indentation:
   #
-  #     import builder.xml.(Document, Generator)
+  # ```inko
+  # import builder.xml.(Document, Generator)
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.element('person').with fn (p) { p.element('name') }
+  # doc.element('person').with fn (p) { p.element('name') }
   #
-  #     Generator
-  #       .new(indent: '  ')
-  #       .generate(doc) # => "<person>\n  <name></name>\n</person>"
+  # Generator
+  #   .new(indent: '  ')
+  #   .generate(doc) # => "<person>\n  <name></name>\n</person>"
+  # ```
   fn pub static new(indent: String) -> Generator {
     Generator(buffer: StringBuffer.new, indent: indent)
   }

@@ -17,11 +17,13 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.html.Document
+  # ```inko
+  # import builder.html.Document
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.to_string # => '<!DOCTYPE html>'
+  # doc.to_string # => '<!DOCTYPE html>'
+  # ```
   fn pub static new -> Document {
     Document(nodes: [], doctype: true)
   }
@@ -34,11 +36,13 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.html.Document
+  # ```inko
+  # import builder.html.Document
   #
-  #     let doc = Document.fragment
+  # let doc = Document.fragment
   #
-  #     doc.to_string # => ''
+  # doc.to_string # => ''
+  # ```
   fn pub static fragment -> Document {
     Document(nodes: [], doctype: false)
   }
@@ -53,11 +57,13 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.html.Document
+  # ```inko
+  # import builder.html.Document
   #
-  #     Document.html('en', fn (html) {
-  #       html.head.title.text('Hello')
-  #     })
+  # Document.html('en', fn (html) {
+  #   html.head.title.text('Hello')
+  # })
+  # ```
   fn pub static html(lang: String, func: fn (mut Element)) -> Document {
     let doc = new
 
@@ -72,12 +78,14 @@ class pub Document {
   #
   # # Examples
   #
-  #     import builder.html.Document
+  # ```inko
+  # import builder.html.Document
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.p.text('hello')
-  #     doc.to_pretty_string # => "<p>\n  hello\n</p>"
+  # doc.p.text('hello')
+  # doc.to_pretty_string # => "<p>\n  hello\n</p>"
+  # ```
   fn pub to_pretty_string -> String {
     Generator.new(indent: '  ').generate(self)
   }
@@ -88,12 +96,14 @@ impl ToString for Document {
   #
   # # Examples
   #
-  #     import builder.html.Document
+  # ```inko
+  # import builder.html.Document
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.p.text('hello')
-  #     doc.to_string # => '<p>hello</p>'
+  # doc.p.text('hello')
+  # doc.to_string # => '<p>hello</p>'
+  # ```
   fn pub to_string -> String {
     Generator.new(indent: '').generate(self)
   }
@@ -135,9 +145,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     Element.new('p')
+  # Element.new('p')
+  # ```
   fn pub static new(name: String) -> Element {
     Element(
       name: name,
@@ -152,9 +164,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     Element.new('user').attr('verified', 'true')
+  # Element.new('user').attr('verified', 'true')
+  # ```
   fn pub mut attr(name: String, value: String) -> mut Element {
     @attributes.set(name, value)
     self
@@ -164,11 +178,13 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     Element.new('person').with fn (person) {
-  #       person.element('name')
-  #     }
+  # Element.new('person').with fn (person) {
+  #   person.element('name')
+  # }
+  # ```
   fn pub mut with(func: fn (mut Element)) -> mut Element {
     func.call(self)
     self
@@ -178,9 +194,11 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     Element.new('link').self_closing
+  # Element.new('link').self_closing
+  # ```
   fn pub mut self_closing -> mut Element {
     @self_closing = true
     self
@@ -196,11 +214,13 @@ class pub Element {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     let el = Element.new('link')
+  # let el = Element.new('link')
   #
-  #     el.self_closing? # => true
+  # el.self_closing? # => true
+  # ```
   fn pub self_closing? -> Bool {
     @self_closing
   }
@@ -235,9 +255,11 @@ trait pub Builder {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     Element.new('p').add(Element.new('span'))
+  # Element.new('p').add(Element.new('span'))
+  # ```
   fn pub mut add(element: Element) {
     nodes_mut.push(Node.Element(element))
   }
@@ -246,14 +268,16 @@ trait pub Builder {
   #
   # # Examples
   #
-  #     import builder.html.(Document, Element)
+  # ```inko
+  # import builder.html.(Document, Element)
   #
-  #     let doc1 = Document.fragment
-  #     let doc2 = Document.fragment
+  # let doc1 = Document.fragment
+  # let doc2 = Document.fragment
   #
-  #     doc1.p.text('test')
-  #     doc2.div.append(doc1)
-  #     doc2.to_string # => '<div><p>test</p></div>'
+  # doc1.p.text('test')
+  # doc2.div.append(doc1)
+  # doc2.to_string # => '<div><p>test</p></div>'
+  # ```
   fn pub mut append(document: Document) {
     match document {
       case { @nodes = n } -> nodes_mut.append(n)
@@ -264,9 +288,11 @@ trait pub Builder {
   #
   # # Examples
   #
-  #     import builder.html.Element
+  # ```inko
+  # import builder.html.Element
   #
-  #     Element.new('p').text('Hello!')
+  # Element.new('p').text('Hello!')
+  # ```
   fn pub mut text(text: String) {
     nodes_mut.push(Node.Text(text))
   }
@@ -862,27 +888,31 @@ class pub Generator {
   #
   # Generating HTML without any indentation:
   #
-  #     import builder.html.(Document, Generator)
+  # ```inko
+  # import builder.html.(Document, Generator)
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.body.with fn (body) { body.p.text('hello') }
+  # doc.body.with fn (body) { body.p.text('hello') }
   #
-  #     Generator
-  #       .new(indent: '')
-  #       .generate(doc) # => '<body><p>hello</p></body>'
+  # Generator
+  #   .new(indent: '')
+  #   .generate(doc) # => '<body><p>hello</p></body>'
+  # ```
   #
   # Using two spaces for indentation:
   #
-  #     import builder.html.(Document, Generator)
+  # ```inko
+  # import builder.html.(Document, Generator)
   #
-  #     let doc = Document.new
+  # let doc = Document.new
   #
-  #     doc.body.with fn (body) { body.p.text('hello') }
+  # doc.body.with fn (body) { body.p.text('hello') }
   #
-  #     Generator
-  #       .new(indent: '  ')
-  #       .generate(doc) # => "<body>\n  <p>\n    hello\n  </p>\n</body>"
+  # Generator
+  #   .new(indent: '  ')
+  #   .generate(doc) # => "<body>\n  <p>\n    hello\n  </p>\n</body>"
+  # ```
   fn pub static new(indent: String) -> Generator {
     Generator(buffer: StringBuffer.new, indent: indent)
   }
