@@ -83,6 +83,9 @@ This produces the following HTML:
 </html>
 ```
 
+For more information, refer to the [API
+documentation](https://yorickpeterse.github.io/inko-markdown/).
+
 # License
 
 All source code in this repository is licensed under the Mozilla Public License
