@@ -64,7 +64,7 @@ fn escape?(input: String, quotes: Bool) -> Bool {
 }
 
 # An XML document.
-class pub Document {
+type pub Document {
   # All top-level nodes in this document.
   let pub @nodes: Array[Node]
 
@@ -150,7 +150,7 @@ impl ToString for Document {
 }
 
 # A node in an XML document.
-class pub enum Node {
+type pub enum Node {
   # The node is an element, i.e. `<foo></foo>`.
   case Element(Element)
 
@@ -159,18 +159,18 @@ class pub enum Node {
 }
 
 # A named XML element.
-class pub Element {
+type pub Element {
   # The name of this element.
-  let pub @name: String
+  let pub mut @name: String
 
   # The attributes of this element.
-  let pub @attributes: Map[String, String]
+  let pub mut @attributes: Map[String, String]
 
   # The child nodes of this element.
-  let pub @nodes: Array[Node]
+  let pub mut @nodes: Array[Node]
 
   # A flag that signals this element is a self-closing element.
-  let @self_closing: Bool
+  let pub mut @self_closing: Bool
 
   # Returns a new element with the given name.
   #
@@ -278,7 +278,7 @@ class pub Element {
 }
 
 # A type for generating an XML `String` from a `Document`.
-class pub Generator {
+type pub Generator {
   let @buffer: StringBuffer
   let @indent: String
 

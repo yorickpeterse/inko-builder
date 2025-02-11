@@ -6,7 +6,7 @@ import std.string (StringBuffer, ToString)
 #
 # A `Document` defaults to being treated as a whole HTML5 document (i.e. with a
 # doctype), but this can be disabled by setting `Document.fragment` to `true`.
-class pub Document {
+type pub Document {
   # All top-level nodes in this document.
   let pub @nodes: Array[Node]
 
@@ -116,7 +116,7 @@ impl Builder for Document {
 }
 
 # A node in an HTML document.
-class pub enum Node {
+type pub enum Node {
   # The node is an element, i.e. `<foo></foo>`.
   case Element(Element)
 
@@ -125,21 +125,21 @@ class pub enum Node {
 }
 
 # An HTML element.
-class pub Element {
+type pub Element {
   # The name of this element.
-  let pub @name: String
+  let pub mut @name: String
 
   # The attributes of this element.
-  let pub @attributes: Map[String, String]
+  let pub mut @attributes: Map[String, String]
 
   # The child nodes of this element.
-  let pub @nodes: Array[Node]
+  let pub mut @nodes: Array[Node]
 
   # If the element is a self-closing element.
-  let pub @self_closing: Bool
+  let pub mut @self_closing: Bool
 
   # If the element should be formatted as an inline element.
-  let pub @inline: Bool
+  let pub mut @inline: Bool
 
   # Returns a new element with the given name.
   #
@@ -878,7 +878,7 @@ trait pub Builder {
 }
 
 # A type for generating an HTML `String` from a `Document`.
-class pub Generator {
+type pub Generator {
   let @buffer: StringBuffer
   let @indent: String
 
