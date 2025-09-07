@@ -12,19 +12,8 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/inko-lang/inko:main
-    steps:
-      - run: microdnf install --quiet --assumeyes tar git
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        id: test
-        with:
-          path: '~/.local/share/inko/packages'
-          key: deps-${{ hashFiles('inko.pkg') }}
-      - run: inko --version
-      - run: inko test
+    name: Tests
+    uses: ./.github/workflows/tests.yml
 
   build:
     runs-on: ubuntu-latest
