@@ -927,7 +927,8 @@ type pub Generator {
       if indent? { @buffer.push('\n') }
     }
 
-    document.nodes.iter.each(fn (node) { node(node, depth: 0, escape: true) })
+    for node in document.nodes.iter { node(node, depth: 0, escape: true) }
+
     @buffer.into_string
   }
 
@@ -943,13 +944,13 @@ type pub Generator {
     @buffer.push('<')
     @buffer.push(element.name)
 
-    element.attributes.iter.each(fn (pair) {
+    for (key, val) in element.attributes.iter {
       @buffer.push(' ')
-      @buffer.push(pair.key)
+      @buffer.push(key)
       @buffer.push('="')
-      @buffer.push(escape(pair.value, quotes: true))
+      @buffer.push(escape(val, quotes: true))
       @buffer.push('"')
-    })
+    }
 
     if element.self_closing? and element.nodes.empty? {
       @buffer.push(' />')
@@ -985,20 +986,18 @@ type pub Generator {
   }
 
   fn mut without_indent(nodes: ref Array[Node], depth: Int, escape: Bool) {
-    nodes.iter.each_with_index(fn (index, child) {
-      node(child, depth + 1, escape)
-    })
+    for child in nodes.iter { node(child, depth + 1, escape) }
   }
 
   fn mut with_indent(nodes: ref Array[Node], depth: Int, escape: Bool) {
     @buffer.push('\n')
 
-    nodes.iter.each_with_index(fn (index, child) {
+    for (index, child) in nodes.iter.with_index {
       let add_indent = match child {
         case Element({ @inline = true }) -> index == 0
         case Text(_) -> {
-          match nodes.opt(index - 1) {
-            case Some(Text(_) or Element({ @inline = true })) -> false
+          match nodes.get(index - 1) {
+            case Ok(Text(_) or Element({ @inline = true })) -> false
             case _ -> true
           }
         }
@@ -1007,14 +1006,14 @@ type pub Generator {
 
       let add_nl = match child {
         case Element({ @inline = true }) -> {
-          match nodes.opt(index + 1) {
-            case Some(Element({ @inline = false })) -> true
+          match nodes.get(index + 1) {
+            case Ok(Element({ @inline = false })) -> true
             case _ -> false
           }
         }
         case Text(v) -> {
-          match nodes.opt(index + 1) {
-            case Some(Text(_) or Element({ @inline = true })) -> false
+          match nodes.get(index + 1) {
+            case Ok(Text(_) or Element({ @inline = true })) -> false
             case _ -> v.ends_with?('\n').false?
           }
         }
@@ -1026,7 +1025,7 @@ type pub Generator {
       node(child, depth + 1, escape)
 
       if add_nl { @buffer.push('\n') }
-    })
+    }
 
     indent(depth)
   }

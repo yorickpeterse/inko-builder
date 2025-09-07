@@ -325,7 +325,8 @@ type pub Generator {
 
     if indent? { @buffer.push('\n') }
 
-    document.nodes.iter.each(fn (node) { node(node, depth: 0) })
+    for node in document.nodes.iter { node(node, depth: 0) }
+
     @buffer.into_string
   }
 
@@ -340,13 +341,13 @@ type pub Generator {
     @buffer.push('<')
     @buffer.push(element.name)
 
-    element.attributes.iter.each(fn (pair) {
+    for (key, val) in element.attributes.iter {
       @buffer.push(' ')
-      @buffer.push(pair.key)
+      @buffer.push(key)
       @buffer.push('="')
-      @buffer.push(escape(pair.value, quotes: true))
+      @buffer.push(escape(val, quotes: true))
       @buffer.push('"')
-    })
+    }
 
     if element.self_closing? and element.nodes.empty? {
       @buffer.push(' />')
@@ -382,18 +383,18 @@ type pub Generator {
   }
 
   fn mut without_indent(nodes: ref Array[Node], depth: Int) {
-    nodes.iter.each_with_index(fn (index, child) { node(child, depth + 1) })
+    for child in nodes.iter { node(child, depth + 1) }
   }
 
   fn mut with_indent(nodes: ref Array[Node], depth: Int) {
     @buffer.push('\n')
 
-    nodes.iter.each_with_index(fn (index, child) {
+    for (index, child) in nodes.iter.with_index {
       let add_indent = match child {
         case Element(_) -> true
         case Text(_) -> {
-          match nodes.opt(index - 1) {
-            case Some(Text(_)) -> false
+          match nodes.get(index - 1) {
+            case Ok(Text(_)) -> false
             case _ -> true
           }
         }
@@ -402,8 +403,8 @@ type pub Generator {
       let add_nl = match child {
         case Element(_) -> true
         case Text(v) -> {
-          match nodes.opt(index + 1) {
-            case Some(Text(_)) -> false
+          match nodes.get(index + 1) {
+            case Ok(Text(_)) -> false
             case _ -> v.ends_with?('\n').false?
           }
         }
@@ -414,7 +415,7 @@ type pub Generator {
       node(child, depth + 1)
 
       if add_nl { @buffer.push('\n') }
-    })
+    }
 
     indent(depth)
   }
