@@ -24,7 +24,7 @@ Generating a simple XML document:
 import builder.xml (Document)
 import std.stdio (STDOUT)
 
-class async Main {
+type async Main {
   fn async main {
     let out = STDOUT.new
     let doc = Document.with(fn (doc) {
@@ -55,7 +55,7 @@ Generating a simple HTML document:
 import builder.html (Document)
 import std.stdio (STDOUT)
 
-class async Main {
+type async Main {
   fn async main {
     let out = STDOUT.new
     let doc = Document.html('en', fn (html) {
