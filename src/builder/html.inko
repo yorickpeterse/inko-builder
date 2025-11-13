@@ -1014,7 +1014,7 @@ type pub Generator {
         case Text(v) -> {
           match nodes.get(index + 1) {
             case Ok(Text(_) or Element({ @inline = true })) -> false
-            case _ -> v.ends_with?('\n').false?
+            case _ -> !v.ends_with?('\n')
           }
         }
         case _ -> true

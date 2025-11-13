@@ -9,7 +9,7 @@ let GT = 62
 
 # Escapes any XML/HTML entities in the input `String`.
 fn escape(input: String, quotes: Bool) -> String {
-  if escape?(input, quotes).false? { return input }
+  if !escape?(input, quotes) { return input }
 
   let buf = ByteArray.new
   let bytes = input.bytes
@@ -405,7 +405,7 @@ type pub Generator {
         case Text(v) -> {
           match nodes.get(index + 1) {
             case Ok(Text(_)) -> false
-            case _ -> v.ends_with?('\n').false?
+            case _ -> !v.ends_with?('\n')
           }
         }
       }

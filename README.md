@@ -7,7 +7,7 @@ Ruby.
 
 # Requirements
 
-- Inko `main`
+- Inko 0.19.0 or newer
 
 # Installation
 
